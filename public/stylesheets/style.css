@@ -1,0 +1,142 @@
+body {
+  background-color: #222222;
+  margin: 0;
+  padding: 0;
+  font-family: Arial;
+  margin-top: 25px;
+  overflow-y: hidden;
+}
+#navbar {
+  background-image: url('../images/sub.png');
+  padding: 1px;
+  margin: 0px;
+  text-align: center;
+  min-width: 800px;
+  margin-left: 150px;
+  margin-right: 150px;
+  border-left: 3px solid black;
+  border-right: 3px solid black;
+  border-top: 3px solid black;
+  border-bottom: 1px solid black;
+}
+#navbar #menu {
+  display: table;
+  padding: 0 10px 0 !important;
+  margin: 0 auto;
+  overflow: hidden;
+  font-size: 1.05em;
+}
+#navbar #menu li {
+  list-style-type: none;
+  margin: 0 auto;
+  float: left;
+}
+#navbar #menu li:hover {
+  background: rgba(28, 24, 26, 0.5);
+}
+#navbar #menu li:hover ul {
+  position: absolute;
+  padding: 0;
+  display: block;
+  width: 160px;
+}
+#navbar #menu li a {
+  font-weight: bold;
+  display: block;
+  color: silver;
+  text-decoration: none;
+  padding: 7px 10px 7px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+#navbar #menu li a:hover {
+  color: #FFFFFF;
+}
+#navbar #menu li li {
+  width: 160px;
+}
+#navbar #menu li li a {
+  text-align: center;
+}
+#navbar #menu li ul {
+  border: 1px solid black;
+  overflow: hidden;
+  display: none;
+  background-image: url('../images/sub.png');
+  box-shadow: 8px 8px 5px #131304 ;
+}
+#footer {
+  text-align: center;
+  padding: 2px;
+  clear: both;
+  background-color: #888;
+  background: black;
+  color: white;
+  margin-left: 150px;
+  margin-right: 150px;
+  font-size: 0.8em;
+}
+#game {
+  color: white;
+  background-image: url('../images/tlo.png');
+  border-left: 3px solid black;
+  border-right: 3px solid black;
+  padding: 10px;
+  margin-left: 150px;
+  margin-right: 150px;
+  white-space: wrap;
+  overflow-x: auto;
+  overflow-y: auto;
+  height: 550px;
+  min-width: 600px;
+}
+.input-1 {
+  width: 100px;
+}
+.input-1:hover {
+  border: 2px solid #CCFF99;
+}
+.input-1:focus {
+  border: 2px solid #A6FF4C;
+  background-color: #FFFFAA;
+}
+.input-2 {
+  width: 200px;
+}
+.input-2:hover {
+  border: 2px solid #CCFF99;
+}
+.input-2:focus {
+  border: 2px solid #A6FF4C;
+  background-color: #FFFFAA;
+}
+.mng-btn {
+  width: 20px;
+  border: 1px solid black;
+  border-radius: 25px;
+}
+.mng-btn:hover {
+  border: 1px solid #FFFF00;
+}
+.bold-center {
+  text-align: center;
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-left: auto;
+  margin-right: auto;
+}
+.thumbnails {
+  position: relative;
+  text-align: left;
+  margin-right: 10px;
+  border: 2px solid #341414;
+  border-radius: 15px;
+}
+.thumbnails:hover {
+  border-color: #FFFF2D;
+}
+.thumbnails .selected {
+  border: 2px solid white;
+}

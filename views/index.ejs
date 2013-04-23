@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+		<div id="navbar">	
+			<ul id="menu"> 
+				<li><a href="index.html">Strona Główna</a></li> 
+				<li><a href="#" title="">Statystyki</a></li> 
+				<li><a href="#">Postać</a>
+					<ul>
+						<li><a href="#">Ekwipunek</a></li>
+						<li><a href="#">Sklep</a></li>
+						<li><a href="#">Zadania</a></li>
+						<li><a href="#">Walka</a></li>
+					</ul>
+				</li>
+				<li><a href="#">Poczta</a></li>
+				<li><a href="#">Zarządzaj</a>
+					<ul> 
+						<li><a href="#" title="">Poradnik</a></li> 
+						<li><a href="createChar.html" title="">Nowa Gra</a></li> 
+						<li><a href="#" title="">Usuń Postać</a></li> 
+					</ul> 
+		 		</li> 
+			</ul> 
+		</div>
+	
+	<div id="game">
+		<h1><%= title %></h1>
+			<p>Welcome to <%= title %></p>
+			<form action="/create" method="post" accept-charset="utf-8">
+				<input type="text" name="nickname"/>
+				<br>
+				<input type="text" name="biography"/>
+				<br>
+				<button type="submit">Dodaj</button>
+			</form>
+		
+			<% heros.forEach(function (hero){ %>
+				<p><%= hero.nickname %></p>
+				<p><%= hero.biography %></p>
+			<% }); %>
+	</div>
+  
+	
+	<div id="footer">
+			Web of Heroes
+	</div>
+  </body>
+</html>
