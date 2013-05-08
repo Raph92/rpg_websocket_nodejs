@@ -11,6 +11,7 @@
 	"mongoose" : "3.6.7",
 	"connect" : "2.7.6",
     "ejs": "*",
-    "less-middleware": "*"
+    "less-middleware": "*",
+	"crypto" : "0.0.3"
   }
 }

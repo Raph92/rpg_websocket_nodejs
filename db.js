@@ -1,11 +1,40 @@
 var mongoose = require('mongoose');
-var Schema   = mongoose.Schema;
+var Schema   = mongoose.Schema,
+	crypto	 = require('crypto');
 
 var Account = new Schema({
-	login		: String,	
-	password	: String,	
-	reg_date	: Date
+	login		: { type: String, required: true, unique: true },
+	salt		: { type: String, required: true },	
+	passwdHash	: { type: String, required: true },	
+	reg_date	: Date,
+	last_login	: Date
 });
+
+var hash = function(passwd, salt) {
+    return crypto.createHmac('sha256', salt).update(passwd).digest('hex');
+};
+
+var genSalt = function (count) {
+	var chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+	var mySalt = '';
+	
+	for (var i = 0; i < count; i += 1) {
+		mySalt += chars[Math.floor(Math.random()*100) % 63];
+	};
+	return mySalt;
+};
+
+Account.methods.setPassword = function(passwordString) {
+    var _salt = genSalt(30);
+	this.passwdHash = hash(passwordString, _salt);
+	this.salt = _salt;
+	return this;
+};
+
+Account.methods.isValidPassword = function(passwordString) {
+	return this.passwdHash === hash(passwordString, this.salt);
+};
+
 mongoose.model('Account', Account);
 
 var Hero = new Schema({

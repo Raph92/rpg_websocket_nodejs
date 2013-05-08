@@ -2,7 +2,6 @@
 /*
  * GET home page.
  */
-
 var mongoose = require('mongoose');
 var Account  = mongoose.model('Account');
 var Hero 	 = mongoose.model('Hero');
@@ -10,10 +9,16 @@ var Hero 	 = mongoose.model('Hero');
 exports.index = function(req, res){
 	res.render('index', {
 		title : 'Web of Heroes',
-		purehtml : '<p class="bold-center">Witam w grze</p>'
+		purehtml : '<p class="bold-center">Witam w grze</p>' +
+				   '<form id="reg-usr" action="/login" method="post" accept-charset="utf-8">' + 
+						'<table>' +
+							'<tr><td><span>Login: </span></td><td><input type="text" name="login"/></td></tr>' +
+							'<tr><td><span>Hasło: </span></td><td><input type="password" name="password"/></td></tr>' +
+						'</table>' +
+						'<button type="submit">Zaloguj</button>' +
+					'</form>'	
 	});
 };
-
 
 exports.register = function (req, res) {
 	res.render('index', {
@@ -32,18 +37,51 @@ exports.register = function (req, res) {
 exports.createAcc = function (req, res) {
 	new Account({
 		login		: req.body.login,
-		password	: req.body.password,
-		reg_date	: Date.now()
-	}).save(function (err, account, count) {
+		reg_date	: Date.now(),
+		last_login	: Date.now()
+	}).setPassword(req.body.password)
+	  .save(function (err, count) {
 		res.redirect('/');
 	});	
 };
 
+exports.login = function (req, res) {
+	Account.findOne({ 'login' : req.body.login}, function (err, account) {
+		var pageHtml = '', purehtml = 
+		'<form id="reg-usr" action="/login" method="post" accept-charset="utf-8">' + 
+			'<table>' +
+				'<tr><td><span>Login: </span></td><td><input type="text" name="login"/></td></tr>' +
+				'<tr><td><span>Hasło: </span></td><td><input type="password" name="password"/></td></tr>' +
+			'</table>' +
+			'<button type="submit">Zaloguj</button>' +
+		'</form>';
+		if (account) {
+			if (account.isValidPassword(req.body.password)) {
+				pageHtml = '<h1>Witaj w grze ' + account.login + '</h1>';
+				purehtml = '';
+				// Session
+				req.session.account = ('account', {
+					user: account.login
+				});
+			} else {
+				pageHtml = '<h3>Błędne hasło, spróbuj jeszcze raz</h3>';
+			}
+		} else {
+			pageHtml = '<h3>Podany użytkownik nie istnieje, spróbuj jeszcze raz</h3>';
+		};
+		res.render( 'index', {
+			title : 'Web of Heroes',
+			purehtml : pageHtml + purehtml
+		});
+	}).update(
+		{ $set: { last_login: Date.now() } }
+	);
+};
+
 exports.createChar = function (req, res) {
-	res.render('index', {
-		title : 'Stwórz postać',
-		purehtml : '' +  
-		'<form id="reg-usr" action="/createHero" method="post" accept-charset="utf-8">' + 
+	var pageHtml = '';
+	if (req.session.account) {
+		pageHtml = '<form id="reg-usr" action="/createHero" method="post" accept-charset="utf-8">' + 
 			'<table>' +
 				'<tr><td><span>Avatar: </span></td><td><img id="avatar" src="../images/avatar.jpg"/></td></tr>' +
 				'<tr><td><span>Imie: </span></td><td><input type="text" name="nickname"/></td></tr>' +
@@ -78,7 +116,14 @@ exports.createChar = function (req, res) {
 				'<input type="hidden" name="mana"/>' +						
 			'</table>' +
 			'<button type="submit">Stwórz postać</button>' +
-		'</form>'
+		'</form>';
+	} else {
+		pageHtml = '<h3>Zaloguj się zanim zrobisz postać</h3>';
+	}
+	
+	res.render('index', {
+		title : 'Stwórz postać',
+		purehtml : pageHtml 
 	});
 };
 
@@ -103,12 +148,11 @@ exports.createHero = function (req, res) {
 };
 
 exports.players = function (req, res) {
-	Account.find( function (err, accounts, count) {
+	Hero.find( function (err, heros, count) {
 		var players = '', i = 0;
-		accounts.forEach(function (account) {
+		heros.forEach(function (hero) {
 			i += 1;
-			players += 	'<p>Imie: ' + account.login + '</p>' +
-						'<p>Hasło: ' + account.password + '</p>';
+			players += 	'<p>Imie: ' + hero.login + '</p>';
 		});
 		if (i === 0) {
 			players += 'Aktualnie brak graczy';
