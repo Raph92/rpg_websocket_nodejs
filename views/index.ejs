@@ -3,48 +3,44 @@
   <head>
     <title><%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel='stylesheet' href='/stylesheets/jquery-ui.css' />
+		<script src='/socket.io/socket.io.js' type='text/javascript'></script>
+		<script type="text/javascript" src="/javascripts/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="/javascripts/jquery-ui.js"></script>
+		<script type="text/javascript" src="/javascripts/woh.js"></script>
+		<script type="text/javascript" src="/javascripts/wohGui.js"></script>
   </head>
   <body>
 		<div id="navbar">	
 			<ul id="menu"> 
-				<li><a href="index.html">Strona Główna</a></li> 
-				<li><a href="#" title="">Statystyki</a></li> 
-				<li><a href="#">Postać</a>
+				<li><a href="/">Strona Główna</a></li> 
+				<li><a href="/statistics" title="">Statystyki</a></li> 
+				<li>
+					<a>Postać</a>
 					<ul>
-						<li><a href="#">Ekwipunek</a></li>
-						<li><a href="#">Sklep</a></li>
-						<li><a href="#">Zadania</a></li>
-						<li><a href="#">Walka</a></li>
+						<li><a href="/inventory">Ekwipunek</a></li>
+						<li><a href="/shoop">Sklep</a></li>
+						<li><a href="/quests">Zadania</a></li>
+						<li><a href="/battles">Walka</a></li>
 					</ul>
 				</li>
-				<li><a href="#">Poczta</a></li>
-				<li><a href="#">Zarządzaj</a>
+				<li><a href="mail">Poczta</a></li>
+				<li>
+					<a>Zarządzaj</a>
 					<ul> 
-						<li><a href="#" title="">Poradnik</a></li> 
-						<li><a href="createChar.html" title="">Nowa Gra</a></li> 
-						<li><a href="#" title="">Usuń Postać</a></li> 
+						<li><a href="/help" title="">Poradnik</a></li> 
+						<li><a href="/register" title="">Rejestracja</a></li> 
+						<li><a href="/create-character" title="">Stwórz Postać</a></li> 
+						<li><a href="/remove-character" title="">Usuń Postać</a></li>
+						<li><a href="/players" title="">Lista Graczy</a></li> 						
 					</ul> 
 		 		</li> 
 			</ul> 
 		</div>
 	
 	<div id="game">
-		<h1><%= title %></h1>
-			<p>Welcome to <%= title %></p>
-			<form action="/create" method="post" accept-charset="utf-8">
-				<input type="text" name="nickname"/>
-				<br>
-				<input type="text" name="biography"/>
-				<br>
-				<button type="submit">Dodaj</button>
-			</form>
-		
-			<% heros.forEach(function (hero){ %>
-				<p><%= hero.nickname %></p>
-				<p><%= hero.biography %></p>
-			<% }); %>
-	</div>
-  
+		<%- purehtml %>		
+	</div> 
 	
 	<div id="footer">
 			Web of Heroes

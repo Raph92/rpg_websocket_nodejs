@@ -7,7 +7,7 @@ body {
   overflow-y: hidden;
 }
 #navbar {
-  background-image: url('../images/sub.png');
+  background-image: url('../images/tlo.png');
   padding: 1px;
   margin: 0px;
   text-align: center;
@@ -64,8 +64,8 @@ body {
   border: 1px solid black;
   overflow: hidden;
   display: none;
-  background-image: url('../images/sub.png');
-  box-shadow: 8px 8px 5px #131304 ;
+  background-image: url('../images/tlo.png');
+  box-shadow: 8px 8px 5px #555555 ;
 }
 #footer {
   text-align: center;
@@ -80,7 +80,7 @@ body {
 }
 #game {
   color: white;
-  background-image: url('../images/tlo.png');
+  background-color: #111111;
   border-left: 3px solid black;
   border-right: 3px solid black;
   padding: 10px;
@@ -91,6 +91,36 @@ body {
   overflow-y: auto;
   height: 550px;
   min-width: 600px;
+  text-align: center;
+}
+#reg-usr table {
+  margin-left: auto;
+  margin-right: auto;
+}
+#reg-usr td {
+  text-align: right;
+  padding-left: 10px;
+}
+#reg-usr td input {
+  width: 100px;
+}
+#reg-usr td select {
+  width: 104px;
+}
+#reg-usr td:first-child {
+  text-align: left;
+  border-right: 1px solid white;
+}
+#reg-usr span {
+  padding-right: 5px;
+  vertical-align: 4px;
+}
+#reg-usr img {
+  margin-left: 2px;
+  margin-right: 2px;
+}
+#reg-usr img:first-child {
+  margin-right: 23px;
 }
 .input-1 {
   width: 100px;
@@ -112,17 +142,9 @@ body {
   border: 2px solid #A6FF4C;
   background-color: #FFFFAA;
 }
-.mng-btn {
-  width: 20px;
-  border: 1px solid black;
-  border-radius: 25px;
-}
-.mng-btn:hover {
-  border: 1px solid #FFFF00;
-}
 .bold-center {
   text-align: center;
-  font-size: 1.2em;
+  font-size: 40px;
   font-weight: bold;
   margin-left: auto;
   margin-right: auto;

@@ -29,10 +29,22 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
+// Webpage views
 app.get('/', routes.index);
+app.get('/register', routes.register);
+app.get('/create-character', routes.createChar);
+app.get('/players', routes.players);
 app.get('/users', user.list);
-app.post('/create', routes.create);
 
-http.createServer(app).listen(app.get('port'), function(){
+
+// Database schemas
+app.post('/createAcc', routes.createAcc);
+app.post('/createHero', routes.createHero);
+
+var server = http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
+
+var socketServer = require('./socket_server');
+socketServer.listen(server);
+
