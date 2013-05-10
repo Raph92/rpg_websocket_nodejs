@@ -47,18 +47,19 @@ app.get('/', routes.index);
 app.get('/register', routes.register);
 app.get('/create-character', routes.createChar);
 app.get('/players', routes.players);
-app.get('/users', user.list);
-
+app.post('/socket-connect', routes.socketConnect);
+app.post('/login', routes.login);
+app.post('/logout', routes.logout);
 
 // Database schemas
 app.post('/createAcc', routes.createAcc);
-app.post('/login', routes.login);
 app.post('/createHero', routes.createHero);
+app.get('/users', user.list);
 
 var server = http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
 
-var socketServer = require('./socket_server');
+var socketServer = require('./routes/index');
 socketServer.listen(server);
 

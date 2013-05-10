@@ -78,6 +78,38 @@ body {
   margin-right: 150px;
   font-size: 0.8em;
 }
+#footer #shoutbox {
+  position: fixed;
+  bottom: 24px;
+  right: 151px;
+  width: 26px;
+  height: 18px;
+  background-color: #333333;
+  border: 1px solid white;
+}
+#footer #shoutbox div {
+  overflow-y: auto;
+  height: 170px;
+}
+#footer #shoutbox span {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  padding-bottom: 1px;
+}
+#footer #shoutbox p {
+  margin-top: 0px;
+  margin-bottom: -3px;
+  margin-left: 2px;
+  text-align: left;
+  padding-right: 20px;
+}
+#footer #shoutbox input {
+  width: 160px;
+  position: absolute;
+  left: 0px;
+  bottom: 0px;
+}
 #game {
   color: white;
   background-color: #111111;
