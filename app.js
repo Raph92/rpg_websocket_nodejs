@@ -13,7 +13,7 @@ var express = require('express')
 var app = express();
 
 var genSalt = function (count) {
-	var chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+	var chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-';
 	var mySalt = '';
 	
 	for (var i = 0; i < count; i += 1) {
@@ -21,7 +21,6 @@ var genSalt = function (count) {
 	};
 	return mySalt;
 };
-
 
 // all environments
 app.set('port', process.env.PORT || 3000);
@@ -31,7 +30,7 @@ app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
 app.use(express.methodOverride());
-app.use(express.cookieParser('cookie salt security'));
+app.use(express.cookieParser('O-bDGMPbOggkKiVsIpKcwitNKyAFzsiL7CEKperKAFIlDqvyo4'));
 app.use(express.session());
 app.use(app.router);
  app.use(require('less-middleware')({ src: __dirname + '/public' }));
@@ -52,8 +51,8 @@ app.post('/login', routes.login);
 app.post('/logout', routes.logout);
 
 // Database schemas
-app.post('/createAcc', routes.createAcc);
-app.post('/createHero', routes.createHero);
+app.post('/create-acc', routes.createAcc);
+app.post('/create-stalker', routes.createStalker);
 app.get('/users', user.list);
 
 var server = http.createServer(app).listen(app.get('port'), function(){

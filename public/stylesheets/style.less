@@ -7,11 +7,11 @@ body {
 	padding: 0;	
 	font-family: @myFont; 
 	margin-top: 25px;
-	overflow-y: hidden;
+	overflow-y: auto;
 }
 #navbar {
-	background-image: url('../images/tlo.png');
-	padding:1px;
+	//background-image: url('../images/tlo.png');
+	padding:10px;
 	margin: 0px;
 	text-align: center;
 	min-width: 800px;
@@ -61,10 +61,11 @@ body {
 				}
 			}
 			ul {
+				background-color: black;
 				border: 1px solid black;
 				overflow: hidden; 
 				display: none; 
-				background-image: url('../images/tlo.png');
+				//background-image: url('../images/tlo.png');
 				box-shadow: 8px 8px 5px #555555 ;
 			}
 		} 
@@ -73,7 +74,7 @@ body {
 
 #footer {
 	text-align: center;
-	padding: 2px;
+	padding: 13px;
 	clear: both;
 	background-color: #888;
 	background: black;
@@ -81,8 +82,9 @@ body {
 	margin-left: 150px;
 	margin-right: 150px;
 	font-size: 0.8em;
+	min-width: 800px;
 	#shoutbox {
-		position: fixed;
+		position: absolute;
 		bottom: 24px;
 		right: 151px;
 		width: 26px;
@@ -91,7 +93,6 @@ body {
 		border: 1px solid white;
 		div {
 			overflow-y: auto;
-			height: 170px;
 		}
 		span {
 			position: absolute;
@@ -115,7 +116,6 @@ body {
 	}
 }	
 
-
 #game {
 	color: white;
 	background-color: #111111;
@@ -127,43 +127,110 @@ body {
 	white-space: wrap;
 	overflow-x: auto;
 	overflow-y: auto;
-	height: 550px;
+	height: 520px;
 	min-width: 600px;
 	text-align: center;
-}
-
-#reg-usr {
-	table {
-		margin-left: auto;
-		margin-right: auto;
-		margin-bottom: 10px;
-	}	
-	td {
-		text-align: right;
-		padding-left: 10px;
-		input {
-			width: 100px;
-		}
-		select {
-			width: 104px;
-		}
-		&:first-child {
-			text-align: left;
-		}
-	}
-	span {
-		padding-right: 5px;
-		vertical-align: 4px;
-	}
-	img {
-		&:first-child {
-			margin-right: 23px;
-		}
+	min-width: 800px;
+	#create-character { // Character create
+		text-align: center;
 		margin-left: 2px;
 		margin-right: 2px;
+		table {
+			margin-left: auto;
+			margin-right: auto;
+			margin-bottom: 10px;
+			#avatar {
+				height: 100px;
+				width: 100px;
+			}
+		}	
+		td {
+			text-align: right;
+			padding-left: 10px;
+			input {
+				width: 100px;
+			}
+			select {
+				width: 104px;
+			}
+			span {
+				padding-right: 5px;
+				vertical-align: 4px;
+			}
+		}
+	}
+	#login {
+		text-align: center;
+		form {
+			table {
+				margin: auto;
+			}
+		}
+	}
+	#index {
+		table {
+			margin: auto;
+		}
+	}
+	#register {
+		table {
+			margin: auto;
+		}
 	}
 }
 
+#avatars_choose {
+	background-color: #222222;
+	border: 3px solid #444444;
+	padding-top : 5px;
+	padding-left : 5px;
+	padding-bottom : 5px;
+	padding-right : 30px;
+	position: absolute;
+	top:  250px;
+	left: 500px;
+	box-shadow : 5px 5px 10px 10px #000000;
+	width: 320px;
+	height: 205px;
+	#close_popup {
+		position: absolute;
+		right : 5px;
+		top : 5px;
+	}
+}
+
+.avatars {
+	height: 100px;
+	width: 100px;
+	margin-left: 2px;
+	margin-right: 2px;
+}
+
+#myPopup {
+	background-color: #222222;
+	border: 3px solid #444444;
+	padding-top : 5px;
+	padding-left : 5px;
+	padding-bottom : 5px;
+	padding-right : 30px;
+	position: absolute;
+	top:  250px;
+	left: 500px;
+	box-shadow : 5px 5px 10px 10px #000000;
+	#close_popup {
+		position: absolute;
+		right : 5px;
+		top : 5px;
+	}
+}
+
+
+
+
+
+
+
+// Helper class
 .input-1 {
 	width: 100px;
 	&:hover {
@@ -185,13 +252,6 @@ body {
 		background-color: #FFFFAA;
 	}
 }
-.mng-btn {
-	
-}
-
-.avatars {
-
-}
 
 .bold-center {
 	text-align: center;
@@ -200,21 +260,3 @@ body {
 	margin-left: auto;
 	margin-right: auto;
 }
-.thumbnails {
-	position: relative;
-	text-align: left;
-	margin-right: 10px;
-	border: 2px solid #341414;
-	border-radius:15px;
-	&:hover {
-		border-color: #FFFF2D;
-	}
-	.selected {
-		border: 2px solid white;	
-	}
-}
-.form-style {
-	
-	
-}
-

@@ -15,7 +15,7 @@ var hash = function(passwd, salt) {
 };
 
 var genSalt = function (count) {
-	var chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+	var chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-';
 	var mySalt = '';
 	
 	for (var i = 0; i < count; i += 1) {
@@ -35,9 +35,9 @@ Account.methods.isValidPassword = function(passwordString) {
 	return this.passwdHash === hash(passwordString, this.salt);
 };
 
-mongoose.model('Account', Account);
+mongoose.model('account', Account);
 
-var Hero = new Schema({
+var Stalker = new Schema({
 	nickname	: String,
 	avatar		: String,
 	level		: String,
@@ -55,6 +55,6 @@ var Hero = new Schema({
 	mana		: String,	
 	reg_date	: Date
 });
-mongoose.model('Hero', Hero);
+mongoose.model('stalker', Stalker);
 
 mongoose.connect('mongodb://localhost/');

@@ -4,11 +4,10 @@ body {
   padding: 0;
   font-family: Arial;
   margin-top: 25px;
-  overflow-y: hidden;
+  overflow-y: auto;
 }
 #navbar {
-  background-image: url('../images/tlo.png');
-  padding: 1px;
+  padding: 10px;
   margin: 0px;
   text-align: center;
   min-width: 800px;
@@ -61,15 +60,15 @@ body {
   text-align: center;
 }
 #navbar #menu li ul {
+  background-color: black;
   border: 1px solid black;
   overflow: hidden;
   display: none;
-  background-image: url('../images/tlo.png');
   box-shadow: 8px 8px 5px #555555 ;
 }
 #footer {
   text-align: center;
-  padding: 2px;
+  padding: 13px;
   clear: both;
   background-color: #888;
   background: black;
@@ -77,9 +76,10 @@ body {
   margin-left: 150px;
   margin-right: 150px;
   font-size: 0.8em;
+  min-width: 800px;
 }
 #footer #shoutbox {
-  position: fixed;
+  position: absolute;
   bottom: 24px;
   right: 151px;
   width: 26px;
@@ -89,7 +89,6 @@ body {
 }
 #footer #shoutbox div {
   overflow-y: auto;
-  height: 170px;
 }
 #footer #shoutbox span {
   position: absolute;
@@ -121,38 +120,92 @@ body {
   white-space: wrap;
   overflow-x: auto;
   overflow-y: auto;
-  height: 550px;
+  height: 520px;
   min-width: 600px;
   text-align: center;
+  min-width: 800px;
 }
-#reg-usr table {
+#game #create-character {
+  text-align: center;
+  margin-left: 2px;
+  margin-right: 2px;
+}
+#game #create-character table {
   margin-left: auto;
   margin-right: auto;
   margin-bottom: 10px;
 }
-#reg-usr td {
+#game #create-character table #avatar {
+  height: 100px;
+  width: 100px;
+}
+#game #create-character td {
   text-align: right;
   padding-left: 10px;
 }
-#reg-usr td input {
+#game #create-character td input {
   width: 100px;
 }
-#reg-usr td select {
+#game #create-character td select {
   width: 104px;
 }
-#reg-usr td:first-child {
-  text-align: left;
-}
-#reg-usr span {
+#game #create-character td span {
   padding-right: 5px;
   vertical-align: 4px;
 }
-#reg-usr img {
+#game #login {
+  text-align: center;
+}
+#game #login form table {
+  margin: auto;
+}
+#game #index table {
+  margin: auto;
+}
+#game #register table {
+  margin: auto;
+}
+#avatars_choose {
+  background-color: #222222;
+  border: 3px solid #444444;
+  padding-top: 5px;
+  padding-left: 5px;
+  padding-bottom: 5px;
+  padding-right: 30px;
+  position: absolute;
+  top: 250px;
+  left: 500px;
+  box-shadow: 5px 5px 10px 10px #000000;
+  width: 320px;
+  height: 205px;
+}
+#avatars_choose #close_popup {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+}
+.avatars {
+  height: 100px;
+  width: 100px;
   margin-left: 2px;
   margin-right: 2px;
 }
-#reg-usr img:first-child {
-  margin-right: 23px;
+#myPopup {
+  background-color: #222222;
+  border: 3px solid #444444;
+  padding-top: 5px;
+  padding-left: 5px;
+  padding-bottom: 5px;
+  padding-right: 30px;
+  position: absolute;
+  top: 250px;
+  left: 500px;
+  box-shadow: 5px 5px 10px 10px #000000;
+}
+#myPopup #close_popup {
+  position: absolute;
+  right: 5px;
+  top: 5px;
 }
 .input-1 {
   width: 100px;
@@ -180,17 +233,4 @@ body {
   font-weight: bold;
   margin-left: auto;
   margin-right: auto;
-}
-.thumbnails {
-  position: relative;
-  text-align: left;
-  margin-right: 10px;
-  border: 2px solid #341414;
-  border-radius: 15px;
-}
-.thumbnails:hover {
-  border-color: #FFFF2D;
-}
-.thumbnails .selected {
-  border: 2px solid white;
 }
