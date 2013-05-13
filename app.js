@@ -46,9 +46,11 @@ app.get('/', routes.index);
 app.get('/register', routes.register);
 app.get('/create-character', routes.createChar);
 app.get('/players', routes.players);
+app.get('/get-character-schema', routes.getCharacterSchema);
 app.post('/socket-connect', routes.socketConnect);
 app.post('/login', routes.login);
 app.post('/logout', routes.logout);
+
 
 // Database schemas
 app.post('/create-acc', routes.createAcc);

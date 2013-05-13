@@ -2,6 +2,10 @@ var mongoose = require('mongoose');
 var Schema   = mongoose.Schema,
 	crypto	 = require('crypto');
 
+
+/* 
+	Account DB schema
+*/
 var Account = new Schema({
 	login		: { type: String, required: true, unique: true },
 	salt		: { type: String, required: true },	
@@ -10,6 +14,9 @@ var Account = new Schema({
 	last_login	: Date
 });
 
+/* 
+	Password Hashing
+*/
 var hash = function(passwd, salt) {
     return crypto.createHmac('sha256', salt).update(passwd).digest('hex');
 };
@@ -34,27 +41,68 @@ Account.methods.setPassword = function(passwordString) {
 Account.methods.isValidPassword = function(passwordString) {
 	return this.passwdHash === hash(passwordString, this.salt);
 };
-
 mongoose.model('account', Account);
 
+var Account = mongoose.model('account');
+
+/*  
+	Stalker Schemas for new players
+*/
+var StalkerSchema = new Schema({
+	id		: String,
+	name	: String,
+	image	: String,
+	str		: String,
+	acc 	: String,
+	end		: String,
+	points	: String
+});
+mongoose.model('stalkerSchema', StalkerSchema);
+
+var StalkerSchema = mongoose.model('stalkerSchema');
+
+/*  
+	Inserts into stalker schemas
+*/
+var createStalkerSchemas = function() {
+	new StalkerSchema({	id : '1', name : 'loners', image: '../images/faction_loners.png', str : 5, acc : 7, end : 6, points : 5 })
+		.save(function (err, stalkerSchema, count) {});
+	new StalkerSchema({	id : '2', name : 'freedom', image: '../images/faction_freedom.png', str : 6, acc : 6, end : 6, points : 5 })
+		.save(function (err, stalkerSchema, count) {});
+	new StalkerSchema({	id : '3', name : 'duty', image: '../images/faction_duty.png', str : 7, acc : 5, end : 6, points : 5 })
+		.save(function (err, stalkerSchema, count) {});
+};
+// createStalkerSchemas();
+
+
+
+/*  
+	Players table
+*/
 var Stalker = new Schema({
-	nickname	: String,
+	nick		: { type: String, required: true, unique: true },
 	avatar		: String,
 	level		: String,
-	exp			: String,
-	race		: String,
-	prof		: String,
-	strength	: String,
-	agility		: String,
-	endurance	: String,
-	magic		: String,
-	lucky		: String,
+	faction		: String,
+	str			: String,
+	acc			: String,
+	end			: String,
 	dmg			: String,
-	crit		: String,
-	hp			: String,
-	mana		: String,	
-	reg_date	: Date
+	headshoot	: String,
+	life		: String,
+	account		: String,
+	equipment	: String,
+	skills		: String
 });
+
+Stalker.methods.calcStats = function() {
+	this.dmg = parseInt(this.str, 10) * 1,5;
+	this.headshoot = parseInt(this.acc, 10);
+	this.life = parseInt(this.end, 10) * 20;
+	return this;
+};
+
+
 mongoose.model('stalker', Stalker);
 
 mongoose.connect('mongodb://localhost/');

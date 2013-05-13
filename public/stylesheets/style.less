@@ -1,6 +1,5 @@
 @myFont: Arial;
 
-
 body {
 	background-color: #222222;
 	margin: 0;
@@ -9,6 +8,10 @@ body {
 	margin-top: 25px;
 	overflow-y: auto;
 }
+
+/* 
+	NAVBAR 
+*/
 #navbar {
 	//background-image: url('../images/tlo.png');
 	padding:10px;
@@ -72,6 +75,9 @@ body {
 	}
 }
 
+/* 
+	FOOTER WITH SHOUTBOX 
+*/
 #footer {
 	text-align: center;
 	padding: 13px;
@@ -83,22 +89,28 @@ body {
 	margin-right: 150px;
 	font-size: 0.8em;
 	min-width: 800px;
-	#shoutbox {
-		position: absolute;
-		bottom: 24px;
-		right: 151px;
-		width: 26px;
-		height: 18px;
-		background-color: #333333;
-		border: 1px solid white;
-		div {
-			overflow-y: auto;
+	height: 20px;
+	#shout_open {
+			float: right;
+			height: 18px;
+			background-color: #333333;
+			border: 1px solid white;
+			border-radius: 3px;
 		}
-		span {
-			position: absolute;
-			bottom: 0px;
-			right: 0px;
-			padding-bottom: 1px;
+	#shoutbox {
+		position: fixed;
+		bottom: 50px;
+		right:70px;
+		width: 200px;
+		height: 200px;
+		border: 1px solid #444444;
+		background-color: black;
+		
+		div {
+			height: 175px;
+			max-height: 175px;
+			opacity: 0.8;
+			overflow-y: auto;
 		}
 		p {
 			margin-top: 0px;
@@ -108,14 +120,14 @@ body {
 			padding-right: 20px;
 		}
 		input {
-			width: 160px;
-			position: absolute;
-			left: 0px;
-			bottom: 0px;
+			width: 190px;
 		}
 	}
 }	
 
+/* 
+	MAIN GAME DIV FOR APPEND OTHER DIVs 
+*/
 #game {
 	color: white;
 	background-color: #111111;
@@ -131,8 +143,10 @@ body {
 	min-width: 600px;
 	text-align: center;
 	min-width: 800px;
-	#create-character { // Character create
+	/* END OF #GAME CSS, STYLING AJAX RESPONSE DIVS */
+	#create-character {
 		text-align: center;
+		font-weight: bold;
 		margin-left: 2px;
 		margin-right: 2px;
 		table {
@@ -143,20 +157,28 @@ body {
 				height: 100px;
 				width: 100px;
 			}
+			#faction {
+				height: 100px;
+				width: 100px;
+			}
 		}	
 		td {
 			text-align: right;
 			padding-left: 10px;
 			input {
-				width: 100px;
+				width: 96px;
 			}
 			select {
-				width: 104px;
+				width: 102px;
 			}
 			span {
 				padding-right: 5px;
 				vertical-align: 4px;
 			}
+		}
+		.stats-btn {
+			margin-left: 2px;
+			margin-right: 2px;
 		}
 	}
 	#login {
@@ -166,10 +188,16 @@ body {
 				margin: auto;
 			}
 		}
+		input {
+			width: 120px;
+		}
 	}
 	#index {
 		table {
 			margin: auto;
+		}
+		input {
+			width: 120px;
 		}
 	}
 	#register {
@@ -179,6 +207,9 @@ body {
 	}
 }
 
+/* 
+	HIDDEN DIV WITH AVATARS USED TO CREATE CHARACTER
+*/
 #avatars_choose {
 	background-color: #222222;
 	border: 3px solid #444444;
@@ -199,6 +230,9 @@ body {
 	}
 }
 
+/* 
+	CLASS FOR EVERY AVATAR IN GAME
+*/
 .avatars {
 	height: 100px;
 	width: 100px;
@@ -206,6 +240,9 @@ body {
 	margin-right: 2px;
 }
 
+/*
+	STYLE FOR MY JAVASCRIPT POPUP
+*/
 #myPopup {
 	background-color: #222222;
 	border: 3px solid #444444;
@@ -225,31 +262,48 @@ body {
 }
 
 
-
-
-
-
-
-// Helper class
-.input-1 {
-	width: 100px;
+/* 
+	HELPER CLASS, STYLED INPUTS ETC.
+*/
+.text_input {
+	font-weight: bold;
+	border-radius: 2px;
+	background-color: #131304;
+	border: 2px solid #79796A;
+	color: white;
 	&:hover {
-		border: 2px solid #CCFF99;
+		border: 2px solid #FFFF73;
 	}
 	&:focus	{
-		border: 2px solid #A6FF4C;
-		background-color: #FFFFAA;
+		border: 2px solid #FFFF00;
 	}
 }
 
-.input-2 {
-	width: 200px;
+.select_input {
+	font-weight: bold;
+	background-color: #131304;
+	border: 2px solid #79796A;
+	border-radius: 5px;
+	color: white;
 	&:hover {
-		border: 2px solid #CCFF99;
+		border: 2px solid #FFFF73;
 	}
 	&:focus	{
-		border: 2px solid #A6FF4C;
-		background-color: #FFFFAA;
+		border: 2px solid #FFFF00;
+	}
+}
+
+.button_input {
+	font-weight: bold;
+	background-color: #131304;
+	border: 2px solid #79796A;
+	border-radius: 5px;
+	color: white;
+	&:hover {
+		border: 2px solid #FFFF73;
+	}
+	&:focus	{
+		border: 2px solid #FFFF00;
 	}
 }
 

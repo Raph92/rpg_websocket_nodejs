@@ -6,6 +6,9 @@ body {
   margin-top: 25px;
   overflow-y: auto;
 }
+/* 
+	NAVBAR 
+*/
 #navbar {
   padding: 10px;
   margin: 0px;
@@ -66,6 +69,9 @@ body {
   display: none;
   box-shadow: 8px 8px 5px #555555 ;
 }
+/* 
+	FOOTER WITH SHOUTBOX 
+*/
 #footer {
   text-align: center;
   padding: 13px;
@@ -77,24 +83,29 @@ body {
   margin-right: 150px;
   font-size: 0.8em;
   min-width: 800px;
+  height: 20px;
 }
-#footer #shoutbox {
-  position: absolute;
-  bottom: 24px;
-  right: 151px;
-  width: 26px;
+#footer #shout_open {
+  float: right;
   height: 18px;
   background-color: #333333;
   border: 1px solid white;
+  border-radius: 3px;
+}
+#footer #shoutbox {
+  position: fixed;
+  bottom: 50px;
+  right: 70px;
+  width: 200px;
+  height: 200px;
+  border: 1px solid #444444;
+  background-color: black;
 }
 #footer #shoutbox div {
+  height: 175px;
+  max-height: 175px;
+  opacity: 0.8;
   overflow-y: auto;
-}
-#footer #shoutbox span {
-  position: absolute;
-  bottom: 0px;
-  right: 0px;
-  padding-bottom: 1px;
 }
 #footer #shoutbox p {
   margin-top: 0px;
@@ -104,11 +115,11 @@ body {
   padding-right: 20px;
 }
 #footer #shoutbox input {
-  width: 160px;
-  position: absolute;
-  left: 0px;
-  bottom: 0px;
+  width: 190px;
 }
+/* 
+	MAIN GAME DIV FOR APPEND OTHER DIVs 
+*/
 #game {
   color: white;
   background-color: #111111;
@@ -124,9 +135,12 @@ body {
   min-width: 600px;
   text-align: center;
   min-width: 800px;
+  /* END OF #GAME CSS, STYLING AJAX RESPONSE DIVS */
+
 }
 #game #create-character {
   text-align: center;
+  font-weight: bold;
   margin-left: 2px;
   margin-right: 2px;
 }
@@ -139,19 +153,27 @@ body {
   height: 100px;
   width: 100px;
 }
+#game #create-character table #faction {
+  height: 100px;
+  width: 100px;
+}
 #game #create-character td {
   text-align: right;
   padding-left: 10px;
 }
 #game #create-character td input {
-  width: 100px;
+  width: 96px;
 }
 #game #create-character td select {
-  width: 104px;
+  width: 102px;
 }
 #game #create-character td span {
   padding-right: 5px;
   vertical-align: 4px;
+}
+#game #create-character .stats-btn {
+  margin-left: 2px;
+  margin-right: 2px;
 }
 #game #login {
   text-align: center;
@@ -159,12 +181,21 @@ body {
 #game #login form table {
   margin: auto;
 }
+#game #login input {
+  width: 120px;
+}
 #game #index table {
   margin: auto;
+}
+#game #index input {
+  width: 120px;
 }
 #game #register table {
   margin: auto;
 }
+/* 
+	HIDDEN DIV WITH AVATARS USED TO CREATE CHARACTER
+*/
 #avatars_choose {
   background-color: #222222;
   border: 3px solid #444444;
@@ -184,12 +215,18 @@ body {
   right: 5px;
   top: 5px;
 }
+/* 
+	CLASS FOR EVERY AVATAR IN GAME
+*/
 .avatars {
   height: 100px;
   width: 100px;
   margin-left: 2px;
   margin-right: 2px;
 }
+/*
+	STYLE FOR MY JAVASCRIPT POPUP
+*/
 #myPopup {
   background-color: #222222;
   border: 3px solid #444444;
@@ -207,25 +244,47 @@ body {
   right: 5px;
   top: 5px;
 }
-.input-1 {
-  width: 100px;
+/* 
+	HELPER CLASS, STYLED INPUTS ETC.
+*/
+.text_input {
+  font-weight: bold;
+  border-radius: 2px;
+  background-color: #131304;
+  border: 2px solid #79796A;
+  color: white;
 }
-.input-1:hover {
-  border: 2px solid #CCFF99;
+.text_input:hover {
+  border: 2px solid #FFFF73;
 }
-.input-1:focus {
-  border: 2px solid #A6FF4C;
-  background-color: #FFFFAA;
+.text_input:focus {
+  border: 2px solid #FFFF00;
 }
-.input-2 {
-  width: 200px;
+.select_input {
+  font-weight: bold;
+  background-color: #131304;
+  border: 2px solid #79796A;
+  border-radius: 5px;
+  color: white;
 }
-.input-2:hover {
-  border: 2px solid #CCFF99;
+.select_input:hover {
+  border: 2px solid #FFFF73;
 }
-.input-2:focus {
-  border: 2px solid #A6FF4C;
-  background-color: #FFFFAA;
+.select_input:focus {
+  border: 2px solid #FFFF00;
+}
+.button_input {
+  font-weight: bold;
+  background-color: #131304;
+  border: 2px solid #79796A;
+  border-radius: 5px;
+  color: white;
+}
+.button_input:hover {
+  border: 2px solid #FFFF73;
+}
+.button_input:focus {
+  border: 2px solid #FFFF00;
 }
 .bold-center {
   text-align: center;
