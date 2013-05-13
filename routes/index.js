@@ -84,17 +84,21 @@ exports.index = function(req, res){
 };
 
 exports.register = function (req, res) {
-	var pageHtml = '<div id="register"><form action="/create-acc" method="post" accept-charset="utf-8">' + 
-						'<table>' +
-							'<tr><td><span>Login: </span></td><td><input class="text_input" type="text" name="login"/></td></tr>' +
-							'<tr><td><span>Hasło: </span></td><td><input class="text_input" type="password" name="password"/></td></tr>' +
-						'</table>' +
-						'<button class="button_input" type="submit">Rejestruj</button>' +
-					'</form></div>';
-	
-	res.writeHead(200, {
-		'Content-Type': 'application/json; charset=utf8'});
-    res.end(JSON.stringify(pageHtml));
+	var pageHtml = '';
+	if (!req.session.account['user']) {
+		pageHtml = '<div id="register"><form action="/create-acc" method="post" accept-charset="utf-8">' + 
+							'<table>' +
+								'<tr><td><span>Login: </span></td><td><input class="text_input" type="text" name="login"/></td></tr>' +
+								'<tr><td><span>Hasło: </span></td><td><input class="text_input" type="password" name="password"/></td></tr>' +
+							'</table>' +
+							'<button class="button_input" type="submit">Rejestruj</button>' +
+						'</form></div>';
+	} else {
+		pageHtml = '<div id="register">Wyloguj się zanim stworzysz nowe konto</div>';
+	};
+		res.writeHead(200, {
+			'Content-Type': 'application/json; charset=utf8'});
+		res.end(JSON.stringify(pageHtml));
 };
 
 exports.createAcc = function (req, res) {
@@ -258,6 +262,35 @@ exports.createStalker = function (req, res) {
 	});	
 };
 
+exports.statistics = function (req, res) {
+	if (req.session.account) {
+		Stalker.findOne({'account' : req.session.account['user']}, function (err, stalkers){
+			var pageHtml = '<div id="statistics">';
+			if(stalkers) {
+				pageHtml += '<table><tr><td><img class="avatars" src="' + stalkers.avatar + '"/></td>';
+				pageHtml += '<td><img class="avatars" src="../images/faction_' + stalkers.faction + '.png"/></td></tr>';
+				pageHtml += '<tr><td>Imię</td><td>' + stalkers.nick + '</td></tr>';
+				pageHtml += '<tr><td>Poziom</td><td>' + stalkers.level + '</td></tr>';
+				pageHtml += '<tr><td>Siła</td><td>' + stalkers.str + '</td></tr>';
+				pageHtml += '<tr><td>Celność</td><td>' + stalkers.acc + '</td></tr>';
+				pageHtml += '<tr><td>Wytrzymałość</td><td>' + stalkers.end + '</td></tr>';
+				pageHtml += '<tr><td>Obrażenia:</td><td>' + stalkers.dmg + '</td></tr>';
+				pageHtml += '<tr><td>Headshoot:</td><td>' + stalkers.headshoot + '%</td></tr>';
+				pageHtml += '<tr><td>Życie:</td><td>' + stalkers.life + '/' + parseInt(stalkers.end) * 20 + ' HP</td></tr>';
+			} else {
+				pageHtml += 'Najpierw musisz stworzyć postać</div>';
+			};
+			res.writeHead(200, {
+				'Content-Type': 'application/json; charset=utf8'});
+			res.end(JSON.stringify(pageHtml));
+		});
+	} else {
+		res.writeHead(200, {
+			'Content-Type': 'application/json; charset=utf8'});
+		res.end(JSON.stringify('<div id="statistics">Najpierw musisz się zalogować</div>'));
+	};
+};
+
 exports.players = function (req, res) {
 	// if (req.session.account) {
 		// Stalker.find( function (err, stalkers, count) {
@@ -281,15 +314,35 @@ exports.players = function (req, res) {
 	// };
 	
 	var pageHtml = '<div id="players">';	
-	for (x in stalkerToSocket) {
-		pageHtml += '<p>' + x + '</p>';
-	};
-	pageHtml += '</div>';
+	if (req.session.account) {
+		for (x in stalkerToSocket) {
+			pageHtml += '<p>' + x + '</p>';
+		};
+		pageHtml += '</div>';
+	} else {
+		pageHtml += 'Lista graczy dostępna tylko dla zalogowanych</div>';
+	}
 	res.writeHead(200, {
 		'Content-Type': 'application/json; charset=utf8'});
 	res.end(JSON.stringify(pageHtml));
-	
-	
-	
 };
+
+exports.removeCharacter = function (req, res) {
+	Stalker.findOne({'account' : req.session.account['user']}, function (err,stalkers) {
+		if (stalkers) {
+			stalkers.remove();
+			delete socketToStalker[stalkerToSocket[req.session.account['user']]];
+			delete stalkerToSocket[req.session.account['user']];
+			// Potwierdzenie
+			res.writeHead(200, {
+				'Content-Type': 'application/json; charset=utf8'});
+			res.end(JSON.stringify('<div id="remove-character">Skasowano</div>'));
+		} else {
+			res.writeHead(200, {
+				'Content-Type': 'application/json; charset=utf8'});
+			res.end(JSON.stringify('<div id="remove-character">Aktualnie nie masz postaci</div>'));
+		};
+	});
+};
+
 

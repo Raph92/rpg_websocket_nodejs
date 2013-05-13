@@ -96,7 +96,7 @@ var Stalker = new Schema({
 });
 
 Stalker.methods.calcStats = function() {
-	this.dmg = parseInt(this.str, 10) * 1,5;
+	this.dmg = parseInt(this.str, 10) * 1.5;
 	this.headshoot = parseInt(this.acc, 10);
 	this.life = parseInt(this.end, 10) * 20;
 	return this;
