@@ -3,16 +3,31 @@ var Schema   = mongoose.Schema,
 	crypto	 = require('crypto');
 
 
-/* 
-	Account DB schema
+/*  
+	Players table
 */
-var Account = new Schema({
-	login		: { type: String, required: true, unique: true },
+var Stalker = new Schema({
+	nick		: { type: String, required: true, unique: true },
 	salt		: { type: String, required: true },	
 	passwdHash	: { type: String, required: true },	
-	reg_date	: Date,
-	last_login	: Date
+	last_login	: Date,
+	avatar		: String,
+	level		: Number,
+	points		: Number,
+	faction		: String,
+	str			: Number,
+	acc			: Number,
+	end			: Number,
+	life		: Number,
+	place		: String
 });
+
+// Stalker.methods.calcStats = function() {
+	// this.dmg = parseInt(this.str, 10) * 1.5;
+	// this.headshoot = parseInt(this.acc, 10);
+	// this.life = parseInt(this.end, 10) * 20;
+	// return this;
+// };
 
 /* 
 	Password Hashing
@@ -31,23 +46,22 @@ var genSalt = function (count) {
 	return mySalt;
 };
 
-Account.methods.setPassword = function(passwordString) {
+Stalker.methods.setPassword = function(passwordString) {
     var _salt = genSalt(30);
 	this.passwdHash = hash(passwordString, _salt);
 	this.salt = _salt;
 	return this;
 };
 
-Account.methods.isValidPassword = function(passwordString) {
+Stalker.methods.isValidPassword = function(passwordString) {
 	return this.passwdHash === hash(passwordString, this.salt);
 };
-mongoose.model('account', Account);
 
-var Account = mongoose.model('account');
+mongoose.model('stalker', Stalker);
 
-/*  
+/*---------------------------------  
 	Stalker Schemas for new players
-*/
+---------------------------------*/
 var StalkerSchema = new Schema({
 	id		: String,
 	name	: String,
@@ -60,7 +74,6 @@ var StalkerSchema = new Schema({
 mongoose.model('stalkerSchema', StalkerSchema);
 
 var StalkerSchema = mongoose.model('stalkerSchema');
-
 /*  
 	Inserts into stalker schemas
 */
@@ -74,35 +87,5 @@ var createStalkerSchemas = function() {
 };
 // createStalkerSchemas();
 
-
-
-/*  
-	Players table
-*/
-var Stalker = new Schema({
-	nick		: { type: String, required: true, unique: true },
-	avatar		: String,
-	level		: String,
-	faction		: String,
-	str			: String,
-	acc			: String,
-	end			: String,
-	dmg			: String,
-	headshoot	: String,
-	life		: String,
-	account		: String,
-	equipment	: String,
-	skills		: String
-});
-
-Stalker.methods.calcStats = function() {
-	this.dmg = parseInt(this.str, 10) * 1.5;
-	this.headshoot = parseInt(this.acc, 10);
-	this.life = parseInt(this.end, 10) * 20;
-	return this;
-};
-
-
-mongoose.model('stalker', Stalker);
 
 mongoose.connect('mongodb://localhost/');

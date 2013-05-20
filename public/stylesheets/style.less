@@ -6,125 +6,8 @@ body {
 	padding: 0;	
 	font-family: @myFont; 
 	margin-top: 25px;
-	overflow-y: auto;
 }
 
-/* 
-	NAVBAR 
-*/
-#navbar {
-	//background-image: url('../images/tlo.png');
-	padding:10px;
-	margin: 0px;
-	text-align: center;
-	min-width: 800px;
-	margin-left: 150px;
-	margin-right: 150px;
-	border-left: 3px solid black;
-	border-right: 3px solid black;
-	border-top: 3px solid black;
-	border-bottom: 1px solid black;
-	#menu {
-		display: table; 
-		padding: 0 10px 0 !important;
-		margin: 0 auto; 
-		overflow: hidden; 
-		font-size: 1.05em; 		
-		li {
-			list-style-type: none; 
-			margin: 0 auto; 
-			float: left; 
-			&:hover {
-				background: rgba(28, 24, 26, 0.5);
-				ul {
-					position: absolute; 
-					padding: 0; 
-					display: block; 
-					width: 160px;
-				}
-			}			
-			a {
-				font-weight: bold;
-				display: block; 
-				color: silver; 
-				text-decoration: none; 
-				padding: 7px 10px 7px;
-				padding-top: 10px;
-				padding-bottom: 10px;
-				padding-left: 20px;
-				padding-right: 20px;
-				&:hover {
-					color: #FFFFFF;	
-				}
-			} 
-			li {
-				width: 160px;
-				a {					
-					text-align: center;
-				}
-			}
-			ul {
-				background-color: black;
-				border: 1px solid black;
-				overflow: hidden; 
-				display: none; 
-				//background-image: url('../images/tlo.png');
-				box-shadow: 8px 8px 5px #555555 ;
-			}
-		} 
-	}
-}
-
-/* 
-	FOOTER WITH SHOUTBOX 
-*/
-#footer {
-	text-align: center;
-	padding: 5px;
-	clear: both;
-	background-color: #888;
-	background: black;
-	color: white;
-	margin-left: 150px;
-	margin-right: 150px;
-	font-size: 0.8em;
-	min-width: 800px;
-	height: 20px;
-	font-weight: bold;
-	#shout_open {
-			float: right;
-			height: 18px;
-			background-color: #333333;
-			border: 1px solid white;
-			border-radius: 3px;
-		}
-	#shoutbox {
-		position: fixed;
-		bottom: 50px;
-		right:70px;
-		width: 200px;
-		height: 200px;
-		border: 1px solid #444444;
-		background-color: black;
-		
-		div {
-			height: 175px;
-			max-height: 175px;
-			opacity: 0.8;
-			overflow-y: auto;
-		}
-		p {
-			margin-top: 0px;
-			margin-bottom: -3px;
-			margin-left: 2px;
-			text-align: left;
-			padding-right: 20px;
-		}
-		input {
-			width: 190px;
-		}
-	}
-}	
 
 /* 
 	MAIN GAME DIV FOR APPEND OTHER DIVs 
@@ -132,93 +15,119 @@ body {
 #game {
 	color: white;
 	background-color: #111111;
-	border-left: 3px solid black;
-	border-right: 3px solid black;
-	padding: 10px;
-	margin-left: 150px;
-	margin-right: 150px;
+	border: 3px solid black;
+	margin-left: auto;
+	margin-right: auto;
+	width: 1000px;
 	white-space: wrap;
 	overflow-x: auto;
 	overflow-y: auto;
-	height: 520px;
-	min-width: 600px;
+	height: 620px;
 	text-align: center;
-	min-width: 800px;
-	/* END OF #GAME CSS, STYLING AJAX RESPONSE DIVS */
-	#create-character {
-		text-align: center;
-		font-weight: bold;
-		margin-left: 2px;
-		margin-right: 2px;
-		table {
-			margin-left: auto;
-			margin-right: auto;
-			margin-bottom: 10px;
-			#avatar {
-				height: 100px;
-				width: 100px;
+	min-width: 1000px;
+	font-weight: bold;
+	border-radius: 4px;
+	box-shadow: 10px 10px 8px black;
+	#gaming {
+		height: 340px;
+		border-bottom: 2px solid black;
+		max-height: 350px;
+		overflow-y: auto;
+		
+		
+		/* TEMPORARY FORMS */
+		#create-character {
+			text-align: center;
+			font-weight: bold;
+			margin-left: 2px;
+			margin-right: 2px;
+			font-size: 0.9em;
+			table {
+				margin-left: auto;
+				margin-right: auto;
+				margin-bottom: 10px;
+				#avatar {
+					height: 100px;
+					width: 100px;
+					margin-left: 2px;
+					margin-right: 2px;
+				}
+				#faction {
+					height: 100px;
+					width: 100px;
+				}
+			}	
+			td {
+				text-align: right;
+				padding-left: 10px;
+				input {
+					width: 96px;
+				}
+				select {
+					width: 102px;
+				}
+				span {
+					padding-right: 5px;
+					vertical-align: 4px;
+				}
+			}
+			.stats-btn {
 				margin-left: 2px;
 				margin-right: 2px;
 			}
-			#faction {
-				height: 100px;
-				width: 100px;
-			}
-		}	
-		td {
-			text-align: right;
-			padding-left: 10px;
-			input {
-				width: 96px;
-			}
-			select {
-				width: 102px;
-			}
-			span {
-				padding-right: 5px;
-				vertical-align: 4px;
+			.stat-icons {
+				position: relative;
+				top: 4px;
+				margin-left: 4px;
 			}
 		}
-		.stats-btn {
-			margin-left: 2px;
-			margin-right: 2px;
-		}
-		.stat-icons {
-		  position: relative;
-			top: 4px;
-			margin-left: 4px;
-		}
-	}
-	#login {
-		text-align: center;
-		form {
+		#index {
+			max-height: 350px;
+			font-size: 0.9em;
 			table {
-				margin: auto;
+				margin-left: auto;
+				margin-right: auto;
+			}
+			input {
+				width: 120px;
 			}
 		}
-		input {
-			width: 120px;
+	}
+	
+	#map {
+		float: left;
+		width: 340px;
+		height: 340px;
+		border-bottom : 2px solid black;
+		background-color: #141616;
+		border-right: 2px solid black;
+		area {
+			&:hover {
+				cursor:pointer;
+			}
 		}
 	}
-	#index {
-		table {
-			margin: auto;
-		}
-		input {
-			width: 120px;
-		}
+	
+	#inventory {
+		width: 340px;
+		text-align: center;
+		padding: 0px;
+		margin: 0px;
+		height: 278px;
+		background-color: #141616;
+		float: left;
+		border-right: 2px solid black;
 	}
-	#register {
-		font-weight: bold;
-		table {
-			margin: auto;
-		}
-	}
+	
 	#statistics {
+		background-color: #141616;
+		font-size: 0.9em;
+		float: left;
+		width: 360px;
+		height: 278px;
 		font-weight: bold;
+		border-right: 2px solid black;
 		table {
-			border: 1px solid #444444;
-			background-color: black;
 			margin-left: auto;
 			margin-right: auto;
 			td {
@@ -231,24 +140,58 @@ body {
 		  position: relative;
 			top: 8px;
 			margin-right: 4px;
+			margin-left: 4px;
 		}
 	}
-	#players {
-		font-weight: bold;
-	}
-	#remove-character {
-		font-weight: bold;
-	}
-	#battles {
-		font-weight: bold;
-		p {
+	
+	#community {
+		float: left;
+		width: 296px;
+		height: 278px;
+		#players {
+			background-color: #141616;
+			font-size: 0.9em;
+			overflow-y: auto;
+			font-weight: bold;
+			height: 147px;
+			max-height: 147px;
+			p {
+				margin-top: 0px;
+				margin-bottom: 0px;
+			}
+			.op-icons {
+				position: relative;
+				top: 6px;
+				margin-right: 4px;
+			}
+		}
+		#shoutbox {
+			width: 296px;
+			height: 129px;
+			border-top: 2px solid black;
+			background-color: #141616;
+			div {
+				height: 101px;
+				max-height: 101px;
+				overflow-y: auto;
+			}
+			p {
+				margin-top: 0px;
+				margin-bottom: 0px;
+				margin-left: 2px;
+				text-align: left;
+				padding-right: 20px;
+				font-size: 0.7em;
+			}
+			input {
+				border : 1px solid gray;
+				background-color: black;
+				margin-top: 4px;
+				width: 290px;
+			}
 		}
 	}
-	.op-icons {
-		position: relative;
-		top: 8px; 
-		margin-right: 4px;
-	}
+	
 }
 
 /* 
@@ -282,6 +225,8 @@ body {
 	width: 100px;
 	margin-left: 2px;
 	margin-right: 2px;
+	&:hover {
+	}
 }
 
 /*

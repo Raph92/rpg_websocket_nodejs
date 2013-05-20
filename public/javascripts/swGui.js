@@ -23,41 +23,44 @@ var shoutboxCatchMsg = function (data) {
 
 /* Interface for shoutbox, and send msg operation */
 var shoutboxInterface = function() {
-	$('#shout_open').click(function () {
-		if ($('#shoutbox').css('visibility') === 'hidden') {
-			$('#shoutbox').css('visibility', 'visible');
-			$('#shoutbox input').keyup(function(e){
-				if (e.keyCode === 13 && $(this).val() !== ''){
-					var shoutboxInput = $(this).val();
-					socket.emit('msg', shoutboxInput);
-					$(this).val('');
-				};
-			}).focus();
-		} else {
-			$('#shoutbox').css({'visibility': 'hidden'});
+	$('#shoutbox input').keyup(function(e){
+		if (e.keyCode === 13 && $(this).val() !== ''){
+			var shoutboxInput = $(this).val();
+			socket.emit('msg', shoutboxInput);
+			$(this).val('');
 		};
+	}).focus();
+};
+
+var getStatistics = function () {
+	$.getJSON("/statistics", function(data) {
+		$('#statistics').html(data);
 	});
 };
 
-/* Request for server resources, and show it as page */
-var pageManager = function() {
-	$('#navbar a').click(function (){
-		var page = $(this).attr('name');
-		if (page !== '/') {
-			$.getJSON(page, function (data){
-				$('#game').html(data);
-				// Script sets for pages
-				if (page === '/create-character') {
-					createCharScripts();
-				};
-				if (page === '/battles') {
-					runBattleScripts();
-				};
-				
-			});
-		} else {
-			document.location.href='/';
-		};
-		return page;
-	});
+var showPlayers = function (data) {
+	var players = '<table>';
+	for (var i = 0; i < data.length; i += 1) {
+		if (i % 3 === 0 && i > 0) players += '<tr>';
+		players += '<td><p><img name="att" src="../images/attack_icon.png" class="op-icons" /><span>' + data[i] + 
+		'</span></p></td>';
+		if (i % 3 === 0 && i > 0) players += '</tr>';
+	};
+	players += '</table>';
+	$('#players').html(players);
+	runBattleScripts();
 };
+
+var loadMap = function () {
+	var cord = '<map name="map-map">' +
+			     '<area shape="rect" coords="1, 1, 50, 50" name="tst" />' +
+				 '<area shape="rect" coords="100,100,150,150" name="qwe"/>' +
+			   '</map>'
+	$('#map').html('<img src="../images/mapa.jpg" usemap="#map-map"/>').append(cord);
+	
+	$('area').click(function (){
+	  alert($(this).attr('name'));
+	});
+	
+};
+

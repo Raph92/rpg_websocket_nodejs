@@ -43,11 +43,9 @@ if ('development' == app.get('env')) {
 
 // Webpage views
 app.get('/', routes.index);
-app.get('/register', routes.register);
 app.get('/create-character', routes.createChar);
 app.get('/remove-character', routes.removeCharacter);
 app.get('/players', routes.players);
-app.get('/battles', routes.battles);
 app.get('/statistics', routes.statistics);
 app.get('/get-character-schema', routes.getCharacterSchema);
 app.post('/socket-connect', routes.socketConnect);
@@ -56,12 +54,11 @@ app.post('/logout', routes.logout);
 
 
 // Database schemas
-app.post('/create-acc', routes.createAcc);
 app.post('/create-stalker', routes.createStalker);
 app.get('/users', user.list);
 
 var server = http.createServer(app).listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
+  console.log('Serwer Stalker Wars nasłuchuje na porcie 3000 ' + app.get('port'));
 });
 
 var socketServer = require('./routes/index');

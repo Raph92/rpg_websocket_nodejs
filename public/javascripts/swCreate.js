@@ -10,7 +10,6 @@ var createCharScripts = function () {
 			$('#avatars_choose').fadeOut(200);
 		});
 		$('#close_popup').click(function (){
-			console.log("qwdewqd");
 			$('#avatars_choose').fadeOut(200);
 		});
 	});	
@@ -60,13 +59,29 @@ var createCharScripts = function () {
 	
 	// Insert stats to input hidden
 	$('#crt-char-form').submit(function(){
-		var str = $('input[name="strength"]').prev().text(),
-			acc = $('input[name="accuracy"]').prev().text(),
-			end = $('input[name="endurance"]').prev().text();
-		$('input[name="strength"]').val(str);
-		$('input[name="accuracy"]').val(acc);
-		$('input[name="endurance"]').val(end);
-		return true;
+		var leftPoints = parseInt($('input[name="points"]').prev().text(), 10)
+		if ($('input[name="nickname"]').val() === '') {
+			alert('Podaj imie');
+			return false;
+		} else {
+			if ($('input[name="password"]').val() === '') {
+				alert('Podaj hasło');
+				return false;
+			} else {
+				if (leftPoints !== 0) {
+					alert('Nie rozdałeś wszystkich punktów statystyk');
+					return false;
+				} else {
+					var str = $('input[name="strength"]').prev().text(),
+						acc = $('input[name="accuracy"]').prev().text(),
+						end = $('input[name="endurance"]').prev().text();
+					$('input[name="strength"]').val(str);
+					$('input[name="accuracy"]').val(acc);
+					$('input[name="endurance"]').val(end);
+					return true;
+				};
+			}
+		};
 	});
 	
 };

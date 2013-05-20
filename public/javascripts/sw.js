@@ -2,9 +2,14 @@ var socket = io.connect('http://localhost:3000');
 $(document).ready(function () {
 	// Socket connection establish
 	$.post("socket-connect", function(data) {
-		if (data) {
+	
+		if (data !== null) {
 			socket.emit('connectMe', data);
-		}; 
+			getStatistics();
+			loadMap();
+		} else {
+			createCharScripts();
+		};
 	});
 	// Receive messages on shoutbox
 	socket.on('msg', function(data) {
@@ -14,15 +19,16 @@ $(document).ready(function () {
 	// Shoutbox on
 	shoutboxInterface();
 
-	// Async page viewer
-	pageManager();
-	
 	socket.on('wantYouFight', function(data) {
 		attackOrRun(data);
 	});
 	
-	
+	socket.on('players-list', function (data) {
+		showPlayers(data);
+	});
 });
+
+
   
   
   
