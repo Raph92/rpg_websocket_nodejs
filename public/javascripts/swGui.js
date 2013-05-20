@@ -22,14 +22,14 @@ var shoutboxCatchMsg = function (data) {
 };
 
 /* Interface for shoutbox, and send msg operation */
-var shoutboxInterface = function(action) {
+var shoutboxInterface = function() {
 	$('#shout_open').click(function () {
 		if ($('#shoutbox').css('visibility') === 'hidden') {
 			$('#shoutbox').css('visibility', 'visible');
 			$('#shoutbox input').keyup(function(e){
 				if (e.keyCode === 13 && $(this).val() !== ''){
 					var shoutboxInput = $(this).val();
-					action(shoutboxInput); // Callback
+					socket.emit('msg', shoutboxInput);
 					$(this).val('');
 				};
 			}).focus();
@@ -46,18 +46,18 @@ var pageManager = function() {
 		if (page !== '/') {
 			$.getJSON(page, function (data){
 				$('#game').html(data);
-				
 				// Script sets for pages
 				if (page === '/create-character') {
 					createCharScripts();
+				};
+				if (page === '/battles') {
+					runBattleScripts();
 				};
 				
 			});
 		} else {
 			document.location.href='/';
 		};
+		return page;
 	});
 };
-
-
-

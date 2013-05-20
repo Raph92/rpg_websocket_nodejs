@@ -47,6 +47,7 @@ app.get('/register', routes.register);
 app.get('/create-character', routes.createChar);
 app.get('/remove-character', routes.removeCharacter);
 app.get('/players', routes.players);
+app.get('/battles', routes.battles);
 app.get('/statistics', routes.statistics);
 app.get('/get-character-schema', routes.getCharacterSchema);
 app.post('/socket-connect', routes.socketConnect);

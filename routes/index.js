@@ -10,6 +10,10 @@ var socketio = require('socket.io');
 var stalkerToSocket = {};
 var socketToStalker = {};
  
+var stalkersInBattle = {}; 
+
+var fightCount = 0;
+
 // SOCKET.IO
 exports.listen = function(server) {
 	var io = socketio.listen(server);
@@ -32,8 +36,18 @@ exports.listen = function(server) {
 				io.sockets.emit('msg', 'Gość: ' + data);
 			};
 		});
+		
+		socket.on('fightWithMe', function (data){
+			// var room = socketToStalker[socket.id] + '/' + data;
+			// stalkersInBattle[socket.id] = room;
+			io.sockets.socket(stalkerToSocket[data]).emit('wantYouFight', { who: socketToStalker[socket.id] } );
+			// socket.join(room);
+		});
+		
 	});
 };
+ 
+
  
 // SOCKET CONNECTED LIST
 exports.socketConnect = function(req, res) {
@@ -42,6 +56,7 @@ exports.socketConnect = function(req, res) {
 			var user_char;
 			if (stalkers !== null) {
 				user_char = stalkers.nick;
+				req.session.account['stalker'] = user_char;
 				res.writeHead(200, {
 					'Content-Type': 'application/json; charset=utf8'});
 				res.end(JSON.stringify(user_char));
@@ -109,12 +124,12 @@ exports.createAcc = function (req, res) {
 	}).setPassword(req.body.password)
 	  .save(function (err, count) {
 		if (err) {
-			if (err.code === 11000) {
-				res.render('index', {
-					title : 'Stalker Wars',
-					purehtml : 'Istnieje już konto o takim loginie'
-				});
-			};
+		  if (err.code === 11000) {
+		    res.render('index', {
+			  title : 'Stalker Wars',
+			  purehtml : 'Istnieje już konto o takim loginie'
+			});
+		  };
 		} else {
 			res.redirect('/');
 		};
@@ -185,7 +200,7 @@ exports.createChar = function (req, res) {
 			if (check === null) {
 				pageHtml = '<div id="create-character"><form id="crt-char-form" action="/create-stalker" method="post" accept-charset="utf-8">' + 
 					'<table>' +
-						'<tr><td><span>Avatar: </span></td><td><img class="avatars" id="avatar" src="../images/avatar_none.jpg"/>' + 
+						'<tr><td><span>Avatar: </span></td><td><img id="avatar" src="../images/avatar_none.jpg"/>' + 
 						'<input type="hidden" name="avatar"/></td>' + 
 						'<td><img id="faction" src="../images/avatar_none.jpg"/></td></tr>' +
 						'<tr><td><span>Imie: </span></td><td><input type="text" name="nickname" class="text_input"/></td></tr>' +
@@ -194,16 +209,19 @@ exports.createChar = function (req, res) {
 						'<option value="loners">Stalkerzy</option><option value="freedom">Wolność</option>' +
 						'<option value="duty">Powinność</option>' +
 						'</select></td></tr>' +
-						'<tr><td><span>Siła: </span></td><td><span></span><input type="hidden" name="strength"/>' +
+						'<tr><td><span>Siła: </span><img class="stat-icons" src="../images/str_icon.png"></td>' + 
+						'<td><span></span><input type="hidden" name="strength"/>' +
 						'<img name="plus" src="../images/plus.png" class="stats-btn"/>' + 
 						'<img name="minus" src="../images/minus.png" class="stats-btn"/></td></tr>' +
-						'<tr><td><span>Celność: </span></td><td><span></span><input type="hidden" name="accuracy"/>' +
+						'<tr><td><span>Celność: </span><img class="stat-icons" src="../images/acc_icon.png"></td>' + 
+						'<td><span></span><input type="hidden" name="accuracy"/>' +
 						'<img name="plus" src="../images/plus.png" class="stats-btn"/>' +
 						'<img name="minus" src="../images/minus.png" class="stats-btn"/></td></tr>' +
-						'<tr><td><span>Wytrzymałość: </span></td><td><span></span><input type="hidden" name="endurance"/>' +
+						'<tr><td><span>Wytrzymałość: </span><img class="stat-icons" src="../images/end_icon.png"></td><td><span></span><input type="hidden" name="endurance"/>' +
 						'<img name="plus" src="../images/plus.png" class="stats-btn"/>' +
 						'<img name="minus" src="../images/minus.png" class="stats-btn"/></td></tr>' +
-						'<tr><td><span>Punkty: </span></td><td><span></span><input type="hidden" name="points"/></td></tr>' +
+						'<tr><td><span>Punkty: </span><img class="stat-icons" src="../images/points_icon.png"></td>' +
+						'<td><span></span><input type="hidden" name="points"/></td></tr>' +
 					'</table>' +
 					'<button class="button_input" type="submit">Stwórz postać</button></form>' +
 					'<div style=\"display : none;" id="avatars_choose">' + img + 
@@ -213,7 +231,6 @@ exports.createChar = function (req, res) {
 					res.end(JSON.stringify(pageHtml));
 			} else {
 				pageHtml = '<div id="create-character">Masz już postać, jeśli chcesz zrobić nową skorzystaj najpierw z zakładki usuń postać</div>';
-				console.log(pageHtml);
 				res.writeHead(200, {
 					'Content-Type': 'application/json; charset=utf8'});
 				res.end(JSON.stringify(pageHtml));
@@ -271,12 +288,12 @@ exports.statistics = function (req, res) {
 				pageHtml += '<td><img class="avatars" src="../images/faction_' + stalkers.faction + '.png"/></td></tr>';
 				pageHtml += '<tr><td>Imię</td><td>' + stalkers.nick + '</td></tr>';
 				pageHtml += '<tr><td>Poziom</td><td>' + stalkers.level + '</td></tr>';
-				pageHtml += '<tr><td>Siła</td><td>' + stalkers.str + '</td></tr>';
-				pageHtml += '<tr><td>Celność</td><td>' + stalkers.acc + '</td></tr>';
-				pageHtml += '<tr><td>Wytrzymałość</td><td>' + stalkers.end + '</td></tr>';
-				pageHtml += '<tr><td>Obrażenia:</td><td>' + stalkers.dmg + '</td></tr>';
-				pageHtml += '<tr><td>Headshoot:</td><td>' + stalkers.headshoot + '%</td></tr>';
-				pageHtml += '<tr><td>Życie:</td><td>' + stalkers.life + '/' + parseInt(stalkers.end) * 20 + ' HP</td></tr>';
+				pageHtml += '<tr><td>Siła: </td><td><img class="stat-icons" src="../images/str_icon.png"/>' + stalkers.str + '</td></tr>';
+				pageHtml += '<tr><td>Celność: </td><td><img class="stat-icons" src="../images/acc_icon.png"/>' + stalkers.acc + '</td></tr>';
+				pageHtml += '<tr><td>Wytrzymałość: </td><td><img class="stat-icons" src="../images/end_icon.png"/>' + stalkers.end + '</td></tr>';
+				pageHtml += '<tr><td>Obrażenia: </td><td>' + stalkers.dmg + '</td></tr>';
+				pageHtml += '<tr><td>Headshoot: </td><td>' + stalkers.headshoot + '%</td></tr>';
+				pageHtml += '<tr><td>Życie: </td><td>' + stalkers.life + '/' + parseInt(stalkers.end) * 20 + ' HP</td></tr>';
 			} else {
 				pageHtml += 'Najpierw musisz stworzyć postać</div>';
 			};
@@ -345,4 +362,23 @@ exports.removeCharacter = function (req, res) {
 	});
 };
 
+exports.battles = function (req, res) {
+	var pageHtml = '<div id="battles">';	
+	if (req.session.account) {
+		for (x in stalkerToSocket) {
+			// if (x !== req.session.account['stalker']) {
+				pageHtml += '<p><img name="att" src="../images/attack_icon.png" class="op-icons" /><span>' + x + '</span></p>';
+			// }	
+		};
+		pageHtml += '</div>';
+	} else {
+		pageHtml += 'Lista graczy dostępna tylko dla zalogowanych</div>';
+	}
+	res.writeHead(200, {
+		'Content-Type': 'application/json; charset=utf8'});
+	res.end(JSON.stringify(pageHtml));
 
+
+
+
+};

@@ -153,6 +153,8 @@ body {
 #game #create-character table #avatar {
   height: 100px;
   width: 100px;
+  margin-left: 2px;
+  margin-right: 2px;
 }
 #game #create-character table #faction {
   height: 100px;
@@ -175,6 +177,11 @@ body {
 #game #create-character .stats-btn {
   margin-left: 2px;
   margin-right: 2px;
+}
+#game #create-character .stat-icons {
+  position: relative;
+  top: 4px;
+  margin-left: 4px;
 }
 #game #login {
   text-align: center;
@@ -211,8 +218,24 @@ body {
   padding-left: 10px;
   padding-right: 10px;
 }
+#game #statistics .stat-icons {
+  position: relative;
+  top: 8px;
+  margin-right: 4px;
+}
 #game #players {
   font-weight: bold;
+}
+#game #remove-character {
+  font-weight: bold;
+}
+#game #battles {
+  font-weight: bold;
+}
+#game .op-icons {
+  position: relative;
+  top: 8px;
+  margin-right: 4px;
 }
 /* 
 	HIDDEN DIV WITH AVATARS USED TO CREATE CHARACTER

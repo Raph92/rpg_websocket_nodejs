@@ -3,16 +3,18 @@ var createCharScripts = function () {
 	$('#avatar').click(function (){
 		$('#avatars_choose').fadeIn(200);
 		$('.avatars').click(function () {
+			console.log("qwdewqd");
 			var clicked_img = $(this).attr("src");
 			$('#avatar').attr('src', clicked_img);
 			$('input[name="avatar"]').val(clicked_img);
 			$('#avatars_choose').fadeOut(200);
 		});
 		$('#close_popup').click(function (){
+			console.log("qwdewqd");
 			$('#avatars_choose').fadeOut(200);
-		});		
-	});
-	
+		});
+	});	
+	  
 	$('#create-character select').change(function (){
 		$.getJSON("/get-character-schema", { faction: $(this).val() } )
 		.done(function( json ) {
