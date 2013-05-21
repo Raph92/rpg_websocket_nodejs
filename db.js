@@ -13,6 +13,7 @@ var Stalker = new Schema({
 	last_login	: Date,
 	avatar		: String,
 	level		: Number,
+	money		: Number,
 	points		: Number,
 	faction		: String,
 	str			: Number,

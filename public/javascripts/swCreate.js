@@ -3,7 +3,6 @@ var createCharScripts = function () {
 	$('#avatar').click(function (){
 		$('#avatars_choose').fadeIn(200);
 		$('.avatars').click(function () {
-			console.log("qwdewqd");
 			var clicked_img = $(this).attr("src");
 			$('#avatar').attr('src', clicked_img);
 			$('input[name="avatar"]').val(clicked_img);
@@ -64,23 +63,28 @@ var createCharScripts = function () {
 			alert('Podaj imie');
 			return false;
 		} else {
-			if ($('input[name="password"]').val() === '') {
-				alert('Podaj hasło');
+			if ($('#avatar').attr('src') === '../images/avatar_none.jpg') {
+				alert('Wybierz avatar');
 				return false;
 			} else {
-				if (leftPoints !== 0) {
-					alert('Nie rozdałeś wszystkich punktów statystyk');
+				if ($('input[name="password"]').val() === '') {
+					alert('Podaj hasło');
 					return false;
 				} else {
-					var str = $('input[name="strength"]').prev().text(),
-						acc = $('input[name="accuracy"]').prev().text(),
-						end = $('input[name="endurance"]').prev().text();
-					$('input[name="strength"]').val(str);
-					$('input[name="accuracy"]').val(acc);
-					$('input[name="endurance"]').val(end);
-					return true;
+					if (leftPoints !== 0) {
+						alert('Nie rozdałeś wszystkich punktów statystyk');
+						return false;
+					} else {
+						var str = $('input[name="strength"]').prev().text(),
+							acc = $('input[name="accuracy"]').prev().text(),
+							end = $('input[name="endurance"]').prev().text();
+						$('input[name="strength"]').val(str);
+						$('input[name="accuracy"]').val(acc);
+						$('input[name="endurance"]').val(end);
+						return true;
+					};
 				};
-			}
+			};
 		};
 	});
 	

@@ -1,4 +1,4 @@
-var runBattleScripts = function () {
+var runBattleScripts = function (socket) {
 
 
 

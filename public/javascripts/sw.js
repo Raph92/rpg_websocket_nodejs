@@ -1,12 +1,11 @@
-var socket = io.connect('http://localhost:3000');
 $(document).ready(function () {
+var socket = io.connect('http://localhost:3000');
 	// Socket connection establish
 	$.post("socket-connect", function(data) {
 	
 		if (data !== null) {
 			socket.emit('connectMe', data);
-			getStatistics();
-			loadMap();
+			getStatistics(socket);
 		} else {
 			createCharScripts();
 		};
@@ -17,18 +16,21 @@ $(document).ready(function () {
 	});
 
 	// Shoutbox on
-	shoutboxInterface();
+	shoutboxInterface(socket);
 
 	socket.on('wantYouFight', function(data) {
 		attackOrRun(data);
 	});
 	
 	socket.on('players-list', function (data) {
-		showPlayers(data);
+		showPlayers(data, socket);
 	});
 });
 
 
+var myStalker = {
+  place : ''
+};
   
   
   

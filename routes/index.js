@@ -9,6 +9,8 @@ var socketio = require('socket.io');
 var stalkerToSocket = {};
 var socketToStalker = {};
  
+var stalkerLocation = {};
+ 
 var stalkersInBattle = {}; 
 var fightCount = 0;
 
@@ -23,24 +25,66 @@ exports.listen = function(server) {
     io.set('log level', 1);
 	
 	io.sockets.on('connection', function (socket) {
+		var playersList = function (room) {
+		    var stalkersList = [];	
+		    for (x in stalkerLocation) {
+			    if (stalkerLocation[x] === room) {
+				    stalkersList.push(socketToStalker[x]);
+			    };
+		    };
+		    return stalkersList;
+	    };
+	
+		var placeMe = function (place) {
+			if (place) {
+				if (!stalkerLocation[socket.id]) {
+					stalkerLocation[socket.id] = place;
+					socket.join(stalkerLocation[socket.id]);
+				};
+				var oldRoom = stalkerLocation[socket.id];
+				socket.broadcast.to(oldRoom).emit('players-list', playersList(oldRoom));
+				
+				stalkerLocation[socket.id] = place;
+				socket.leave(oldRoom);
+				socket.join(stalkerLocation[socket.id]);
+				
+				socket.broadcast.to(stalkerLocation[socket.id]).emit('players-list', playersList(stalkerLocation[socket.id]));
+				socket.emit('players-list', playersList(stalkerLocation[socket.id]));
+			} else {
+				Stalker.findOne({ 'nick' : socketToStalker[socket.id]}, function(err,stalkers){
+					placeMe(stalkers.place);
+				});
+			};
+		};
+		
 		socket.on('connectMe', function (data) {
 			stalkerToSocket[data] = socket.id;
 			socketToStalker[socket.id] = data;
-			io.sockets.emit('players-list', playersList());
+			placeMe();
 		});
 		socket.on('disconnect', function () {
 			delete stalkerToSocket[socketToStalker[socket.id]];
 			delete socketToStalker[socket.id];
-			io.sockets.emit('players-list', playersList());
+			var oldRoom = stalkerLocation[socket.id];
+			delete stalkerLocation[socket.id];
+			socket.broadcast.to(oldRoom).emit('players-list', playersList(oldRoom));
 		});
 		
 		socket.on('msg', function (data){
 			if (socketToStalker[socket.id]) {
-				io.sockets.emit('msg', socketToStalker[socket.id] + ': ' + data);
+				io.sockets.to(stalkerLocation[socket.id]).emit('msg', socketToStalker[socket.id] + ': ' + data);
 			} else {
 				io.sockets.emit('msg', 'Gość: ' + data);
 			};
 		});
+		
+		socket.on('travel', function (data) {
+			Stalker.findOne({ 'nick' : socketToStalker[socket.id]}, function(err,stalkers){})
+			       .update(
+				       { $set: { place: data.where } }
+			       );
+			placeMe(data.where);
+	    });
 		
 		socket.on('fightWithMe', function (data){
 			// var room = socketToStalker[socket.id] + '/' + data;
@@ -53,7 +97,6 @@ exports.listen = function(server) {
 		
 	});
 };
- 
 
 /*------------------------------------------------ 
       LIST OF PLAYERS AVAILABLE VIA SOCKETS
@@ -70,17 +113,6 @@ exports.socketConnect = function(req, res) {
 		res.end(JSON.stringify(null));
 	}
 };
-
-var playersList = function (mySocket) {
-	var stalkersList = [];	
-	for (x in stalkerToSocket) {
-		stalkersList.push(x);
-	};
-	return stalkersList;
-};
-
-
-
 
 exports.index = function(req, res){
 	var pageHtml = '',
@@ -210,13 +242,15 @@ exports.createStalker = function (req, res) {
 		nick		: req.body.nickname,
 		avatar		: req.body.avatar,
 		last_login	: Date.now(),
-		level		: parseInt(1, 10),
-		points		: parseInt(0, 10),
+		level		: 1,
+		money		: 100,
+		points		: 0,
 		faction		: req.body.faction,
 		str			: parseInt(req.body.strength, 10),
 		acc			: parseInt(req.body.accuracy, 10),
 		end			: parseInt(req.body.endurance, 10),
 		life		: parseInt(req.body.endurance, 10) * 20,
+		place		: 'rostok',
 	}).setPassword(req.body.password)
 	  .save(function (err, count) {
 		if (err) {
@@ -246,7 +280,9 @@ exports.statistics = function (req, res) {
 				pageHtml += '<img class="stat-icons" src="../images/end_icon.png"/>' + stalkers.end;
 				pageHtml += '</td></tr><tr><td>Dmg: </td><td>' + parseInt(stalkers.str, 10) * 1,5 + '</td></tr>';
 				pageHtml += '<tr><td>Headshoot: </td><td>' + parseInt(stalkers.acc, 10) + '%</td></tr>';
-				pageHtml += '<tr><td>Życie: </td><td>' + stalkers.life + '/' + parseInt(stalkers.end) * 20 + ' HP</td></tr></table>';
+				pageHtml += '<tr><td>Życie: </td><td>' + stalkers.life + '/' + parseInt(stalkers.end) * 20 + ' HP</td></tr>';
+				pageHtml += '<tr><td colspan=2><img class="stat-icons" src="../images/money.png"/>' + stalkers.money + ' RU</td></tr></table>';
+				pageHtml += '<span style="visibility: hidden">' + stalkers.place + '</span>';
 			};
 			pageHtml += '<br/><form action="/logout" method="post" accept-charset="utf-8">' + 
 							'<button class="button_input" type="submit">Wyloguj</button>' +
@@ -260,44 +296,4 @@ exports.statistics = function (req, res) {
 			'Content-Type': 'application/json; charset=utf8'});
 		res.end(JSON.stringify('Najpierw musisz się zalogować'));
 	};
-};
-
-
-
-exports.removeCharacter = function (req, res) {
-	if (req.session.account) {
-		Stalker.findOne({'nick' : req.session.account['stalker']}, function (err,stalkers) {
-			if (stalkers) {
-				stalkers.remove();
-				delete socketToStalker[stalkerToSocket[req.session.account['stalker']]];
-				delete stalkerToSocket[req.session.account['stalker']];
-				req.session.account = null;
-				res.writeHead(200, {
-					'Content-Type': 'application/json; charset=utf8'});
-				res.end(JSON.stringify('<div id="remove-character">Skasowano</div>'));
-			}
-		});
-	} else {
-		res.writeHead(200, {
-			'Content-Type': 'application/json; charset=utf8'});
-		res.end(JSON.stringify('<div id="remove-character">Zaloguj się jak chcesz usunąć swoje konto</div>'));
-	};
-};
-
-exports.players = function (req, res) {
-	var pageHtml = '<div id="battles">';	
-	if (req.session.account) {
-		for (x in stalkerToSocket) {
-			// if (x !== req.session.account['stalker']) {
-				pageHtml += '<p><img name="att" src="../images/attack_icon.png" class="op-icons" /><span>' + x + '</span></p>';
-			// }	
-		};
-		pageHtml += '</div>';
-	} else {
-		pageHtml += 'Lista graczy dostępna tylko dla zalogowanych</div>';
-	}
-	res.writeHead(200, {
-		'Content-Type': 'application/json; charset=utf8'});
-	res.end(JSON.stringify(pageHtml));
-
 };

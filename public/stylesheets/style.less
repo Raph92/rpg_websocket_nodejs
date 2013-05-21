@@ -101,10 +101,12 @@ body {
 		border-bottom : 2px solid black;
 		background-color: #141616;
 		border-right: 2px solid black;
-		area {
-			&:hover {
-				cursor:pointer;
-			}
+		position: relative;
+		canvas {
+			position:absolute; 
+			top:0; 
+			left:0; 
+			z-index:0
 		}
 	}
 	
@@ -116,17 +118,17 @@ body {
 		height: 278px;
 		background-color: #141616;
 		float: left;
-		border-right: 2px solid black;
+		border-right: 4px solid black;
 	}
 	
 	#statistics {
 		background-color: #141616;
 		font-size: 0.9em;
 		float: left;
-		width: 360px;
+		width: 324px;
 		height: 278px;
 		font-weight: bold;
-		border-right: 2px solid black;
+		border-right: 4px solid black;
 		table {
 			margin-left: auto;
 			margin-right: auto;
@@ -146,7 +148,7 @@ body {
 	
 	#community {
 		float: left;
-		width: 296px;
+		width: 328px;
 		height: 278px;
 		#players {
 			background-color: #141616;
@@ -166,7 +168,6 @@ body {
 			}
 		}
 		#shoutbox {
-			width: 296px;
 			height: 129px;
 			border-top: 2px solid black;
 			background-color: #141616;
@@ -187,7 +188,7 @@ body {
 				border : 1px solid gray;
 				background-color: black;
 				margin-top: 4px;
-				width: 290px;
+				width: 320px;
 			}
 		}
 	}
@@ -302,4 +303,14 @@ body {
 	font-weight:bold;
 	margin-left: auto;
 	margin-right: auto;
+}
+.ui-tooltip {
+	background: black;
+	border: 2px solid white;
+	color: white;
+}
+.actual-place {
+	background-image : url(../images/here.png);
+	background-repeat:no-repeat;
+	background-position:center; 
 }

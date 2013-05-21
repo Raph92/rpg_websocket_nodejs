@@ -22,7 +22,7 @@ var shoutboxCatchMsg = function (data) {
 };
 
 /* Interface for shoutbox, and send msg operation */
-var shoutboxInterface = function() {
+var shoutboxInterface = function(socket) {
 	$('#shoutbox input').keyup(function(e){
 		if (e.keyCode === 13 && $(this).val() !== ''){
 			var shoutboxInput = $(this).val();
@@ -32,13 +32,14 @@ var shoutboxInterface = function() {
 	}).focus();
 };
 
-var getStatistics = function () {
-	$.getJSON("/statistics", function(data) {
-		$('#statistics').html(data);
-	});
+var getStatistics = function (socket) {
+  $.getJSON("/statistics", function(data) {
+	$('#statistics').html(data);
+	loadMap(socket);
+  });
 };
 
-var showPlayers = function (data) {
+var showPlayers = function (data, socket) {
 	var players = '<table>';
 	for (var i = 0; i < data.length; i += 1) {
 		if (i % 3 === 0 && i > 0) players += '<tr>';
@@ -48,19 +49,96 @@ var showPlayers = function (data) {
 	};
 	players += '</table>';
 	$('#players').html(players);
-	runBattleScripts();
+	runBattleScripts(socket);
 };
 
-var loadMap = function () {
-	var cord = '<map name="map-map">' +
-			     '<area shape="rect" coords="1, 1, 50, 50" name="tst" />' +
-				 '<area shape="rect" coords="100,100,150,150" name="qwe"/>' +
-			   '</map>'
-	$('#map').html('<img src="../images/mapa.jpg" usemap="#map-map"/>').append(cord);
+
+// 
+//  Funkcje ładujące mapke, wysłać socketem info, update db, join to room, i refactor tej funkcji 
+//
+var loadMap = function (socket) {
+	$('#map').html('<img src="../images/mapa.jpg"/><canvas width="340" height="340" id="can"></canvas>');
+	$('#map').append('<div title="Wysypisko" name="garbage" style="position:absolute;width: 50px;' +
+					 'height: 50px; bottom:15px; left: 130px; z-index: 100"></div>' + 
+					 '<div title="Bar" name="rostok" style="position:absolute;width:30px;height:30px;' +
+					 'top: 165px; left: 140px; z-index: 100"></div>' +
+					 '<div title="Jantar" name="yantar" style="position:absolute;width:30px;height:40px;' +
+					 'top: 190px; left: 45px; z-index: 100"></div>');
+	// First place load
+	$('div[name="' + $('#statistics span').text() + '"]').fadeOut(0).addClass('actual-place').fadeIn(2000);
+	$('#gaming').fadeOut(0).css('background-image', 'url(../images/' + $('#statistics span').text() + '.jpg)').fadeIn(1000);
 	
-	$('area').click(function (){
-	  alert($(this).attr('name'));
+	/* Function to calculate divs center */
+	var divCenters = function () { 
+	  var divLeft, 
+		  divWidth,
+		  divTop,
+		  divHeight,
+		  $divToCalc;
+	  
+	  $divToCalc = $('div.actual-place');
+	  
+	  divLeft = $divToCalc.css('left');
+		divLeft = parseInt(divLeft.slice(0, divLeft.length - 2), 10);
+	  divWidth = $divToCalc.css('width');
+		divWidth = parseInt(divWidth.slice(0, divWidth.length -2), 10);
+	  
+	  divTop = $divToCalc.css('top');
+		divTop = parseInt(divTop.slice(0, divTop.length - 2), 10 );
+	  divHeight = $divToCalc.css('height');
+		divHeight = parseInt(divHeight.slice(0, divHeight.length - 2), 10);
+	  
+	  var point = [];
+	  point.push(divLeft + divWidth /2); // x
+	  point.push(divTop + divHeight /2); // y
+	  return point;
+	};
+		
+	/* Draw lines between divs (ax,ay,bx,by) */
+	var drawTravelLines = function ( points ) { 
+		var canvas = document.getElementById('can');
+		if (canvas.getContext) {
+			var c = canvas.getContext('2d');
+				c.clearRect(0,0,340,340);
+				c.lineCap = 'round';
+				c.lineWidth = 3;
+				c.beginPath();
+				c.moveTo(points[0],points[1]);
+				c.lineTo(points[2],points[3]);
+				c.stroke();
+		};
+	};
+	
+	/* Function fun after click on another place */
+	var travel = function () { 
+		$('#map div').unbind('click');	
+		setTimeout( function () {
+			$('#map div').click(travel)
+			.tooltip({
+				track: true
+			});
+		}, 3000);	
+		
+		$('#can').fadeIn(0);
+		var cords = divCenters(); // Cords of previous div
+		
+		$('div.actual-place').fadeOut(0).removeClass('actual-place').fadeIn(0);
+		$(this).fadeOut(0).addClass('actual-place').fadeIn(1000);
+		
+		drawTravelLines(cords.concat(divCenters())); // Draw lines beetwen old and new div
+		$('#can').fadeOut(2000);
+		
+		// Load place background to gaming div
+		$('#gaming').fadeOut(0).css('background-image', 'url(../images/' + $('div.actual-place').attr('name') + '.jpg)').fadeIn(2500);
+		
+		socket.emit('travel', { where: $('div.actual-place').attr('name') });
+		
+	};
+	
+	$('#map div').click(travel)
+	.tooltip({
+		track: true
 	});
-	
 };
+
 

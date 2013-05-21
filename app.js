@@ -44,14 +44,11 @@ if ('development' == app.get('env')) {
 // Webpage views
 app.get('/', routes.index);
 app.get('/create-character', routes.createChar);
-app.get('/remove-character', routes.removeCharacter);
-app.get('/players', routes.players);
 app.get('/statistics', routes.statistics);
 app.get('/get-character-schema', routes.getCharacterSchema);
 app.post('/socket-connect', routes.socketConnect);
 app.post('/login', routes.login);
 app.post('/logout', routes.logout);
-
 
 // Database schemas
 app.post('/create-stalker', routes.createStalker);
