@@ -4,7 +4,7 @@
  */
 
 var express = require('express')
-  ,	db = require( './db' )
+  ,  db = require( './db' )
   , routes = require('./routes')
   , user = require('./routes/user')
   , http = require('http')
@@ -13,13 +13,13 @@ var express = require('express')
 var app = express();
 
 var genSalt = function (count) {
-	var chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-';
-	var mySalt = '';
-	
-	for (var i = 0; i < count; i += 1) {
-		mySalt += chars[Math.floor(Math.random()*100) % 63];
-	};
-	return mySalt;
+  var chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-';
+  var mySalt = '';
+  
+  for (var i = 0; i < count; i += 1) {
+    mySalt += chars[Math.floor(Math.random()*100) % 63];
+  };
+  return mySalt;
 };
 
 // all environments
@@ -27,11 +27,11 @@ app.set('port', process.env.PORT || 3000);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 app.use(express.favicon());
+app.use(express.cookieParser());
+app.use(express.session({secret : 'bDGMPbOggkKiVsIpKcwitNKIpKcwitNKyAFzsiL7CEKper'}));
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
 app.use(express.methodOverride());
-app.use(express.cookieParser('O-bDGMPbOggkKiVsIpKcwitNKyAFzsiL7CEKperKAFIlDqvyo4'));
-app.use(express.session());
 app.use(app.router);
  app.use(require('less-middleware')({ src: __dirname + '/public' }));
 app.use(express.static(path.join(__dirname, 'public')));
