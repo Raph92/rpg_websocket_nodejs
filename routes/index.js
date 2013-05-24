@@ -2,6 +2,7 @@
 var mongoose = require('mongoose'),
     Stalker  = mongoose.model('stalker'),
     StalkerSchema = mongoose.model('stalkerSchema'),
+    EventSchema = mongoose.model('eventSchema'),
     socketio = require('socket.io'),
     cookie  =   require('cookie'),
     connect =   require('connect');
@@ -49,6 +50,60 @@ var parseDate = function (timeDate) {
 exports.listen = function(server) {
   var io = socketio.listen(server);
   io.set('log level', 1);
+  
+  // EVENTS START
+  
+  // setInterval( function () { 
+    // makeEvent();
+  // }, 5000);
+  
+  var makeEvent = function () {
+    var availableEvents = ['snork'];
+    
+    var choosePlayers = function (eventType) {
+      var who = [];
+      for (var x in socketToStalker) {
+        if ( Math.random() > 0.5 ) {
+          who.push(x);
+        } else {
+          who.push(x);
+        }
+      };
+      for (var i = 0; i < who.length; i += 1) {
+        io.sockets.socket(who[i]).emit('server-event', eventType);
+      };
+    };
+    
+    var chooseEvent = function (event_data) {
+      if (event_data) {
+        var eventData = event_data;
+        choosePlayers(eventData);
+      } else {
+        EventSchema.findOne({'id' : availableEvents[0]}, function (err, eventSchema) {
+          var prepare = {};  
+              prepare.name        = eventSchema.name;
+              prepare.info        = eventSchema.info;
+              prepare.bg          = eventSchema.bg;
+              prepare.time        = eventSchema.time;
+              prepare.speed       = eventSchema.speed;
+              prepare.reward      = eventSchema.reward;
+              prepare.rewardText  = eventSchema.rewardText;
+              prepare.penalty     = eventSchema.penalty;
+              prepare.penaltyText = eventSchema.penaltyText;
+          chooseEvent(prepare);          
+        });
+      };
+    };
+      
+    chooseEvent();
+    
+    
+    
+    // CZEKANIE NA WYNIKI ZABIJANIA !!!
+    
+    
+  };
+  // END OF MAKE EVENTS
   
 
   /*  Authorization with SID from client cookie, SID is added to list of 
@@ -103,13 +158,19 @@ exports.listen = function(server) {
       placeMe();
       Stalker.findOne({ 'nick' : socketToStalker[socket.id]}, function (err, stalker) {
         socket.emit('msg', 'Ostatnio zalogowany: ' + parseDate(stalker.last_login));
-      });
+      }).update(
+        { $set: { last_login: Date.now() } }
+      );
+      setTimeout( function () {
+        makeEvent();
+      }, 4000);
     });
-    
-    
-    
-    
-    
+
+
+
+
+
+    // FIGHTS
     socket.on('fightWithMe', function (data){
       // var room = socketToStalker[socket.id] + '/' + data;
       // stalkersInBattle[socket.id] = room;
@@ -202,9 +263,7 @@ exports.login = function (req, res) {
         gaming : pageHtml
       });
     };
-  }).update(
-    { $set: { last_login: Date.now() } }
-  );
+  });
 };
 
 // LOGOUT

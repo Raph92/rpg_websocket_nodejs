@@ -1,18 +1,32 @@
 'use strict';
 /* Popup window generator */
-var myPopup = function (text, height, width, delay) {    
+var myPopup = function (text, delay) {    
   if ($('body').find('#myPopup').html() !== undefined) {
     $('#myPopup').remove();  
   };        
   $('body').append('<div id="myPopup" style="display : none;">' 
-  + text + '<img id="close_popup" src="../images/close.png"></img></div>');    
+  + text + '</div>');    
   
-  $('#myPopup').css({  'height': height + 'px', 'width': width + 'px' });    
-  $('#myPopup #close_popup').click(function () {
-    $('#myPopup').remove();      
-  });    
-  $('#myPopup').fadeIn(delay);  
+  $('#myPopup').css({  'left': '150px', 'top' : '150px', 'height' : '340px', 'width' : '340px' });    
+  
+  setTimeout( function () {
+    $('#myPopup').remove();
+  }, delay);
+  
+  $('#myPopup').fadeIn(100);  
 };
+
+var fsMsg = function (text, delay) {    
+  $('body').append('<p id="fsMsg" style="display : none;">' 
+  + text + '</p>');    
+  
+  setTimeout( function () {
+    $('#fsMsg').remove();
+  }, delay);
+  
+  $('#fsMsg').fadeIn(1000);  
+};
+
 /* Write msg received on shoutbox */
 var shoutboxCatchMsg = function (data) {
   $('#shoutbox div')
@@ -26,7 +40,7 @@ var shoutboxInterface = function(socket) {
   $('#shoutbox input').keyup(function(e){
     if (e.keyCode === 13 && $(this).val() !== ''){
       var shoutboxInput = $(this).val();
-      socket.emit('msg', shoutboxInput);
+        socket.emit('msg', shoutboxInput);
       $(this).val('');
     };
   }).focus();
@@ -34,8 +48,8 @@ var shoutboxInterface = function(socket) {
 
 var getStatistics = function (socket) {
   $.getJSON("/statistics", function(data) {
-  $('#statistics').html(data);
-  loadMap(socket);
+    $('#statistics').html(data);
+    loadMap(socket);
   });
 };
 
@@ -44,7 +58,7 @@ var showPlayers = function (data, socket) {
   for (var i = 0; i < data.length; i += 1) {
     if (i % 3 === 0 && i > 0) players += '<tr>';
     players += '<td><p><img name="att" src="../images/attack_icon.png" class="op-icons" /><span>' + data[i] + 
-    '</span></p></td>';
+               '</span></p></td>';
     if (i % 3 === 0 && i > 0) players += '</tr>';
   };
   players += '</table>';

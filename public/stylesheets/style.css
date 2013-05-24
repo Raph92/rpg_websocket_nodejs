@@ -229,11 +229,21 @@ body {
   top: 250px;
   left: 500px;
   box-shadow: 5px 5px 10px 10px #000000;
+  z-index: 1000;
 }
 #myPopup #close_popup {
   position: absolute;
   right: 5px;
   top: 5px;
+}
+#fsMsg {
+  position: absolute;
+  z-index: 1000;
+  font-size: 3em;
+  color: white;
+  left: 145px;
+  top: 5px;
+  background-color: rgba(34, 34, 34, 0.8);
 }
 /* 
 	HELPER CLASS, STYLED INPUTS ETC.

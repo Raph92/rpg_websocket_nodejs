@@ -1,5 +1,9 @@
 var runBattleScripts = function (socket) {
-
+  
+// OBJECT FOR RECEIVING CHARACTER TO BATTLE
+var myStalker = {
+  place : ''
+};
 
 
 
