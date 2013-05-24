@@ -48,7 +48,7 @@ app.get('/statistics', routes.statistics);
 app.get('/get-character-schema', routes.getCharacterSchema);
 app.post('/socket-connect', routes.socketConnect);
 app.post('/login', routes.login);
-app.post('/logout', routes.logout);
+app.get('/logout', routes.logout);
 
 // Database schemas
 app.post('/create-stalker', routes.createStalker);

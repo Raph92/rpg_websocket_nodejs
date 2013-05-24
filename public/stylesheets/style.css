@@ -3,33 +3,40 @@ body {
   margin: 0;
   padding: 0;
   font-family: Arial;
-  margin-top: 25px;
+  margin-top: 10px;
+  background-image: url(../images/bbg2.jpg);
 }
 /* 
 	MAIN GAME DIV FOR APPEND OTHER DIVs 
 */
 #game {
   color: white;
-  background-color: #111111;
-  border: 3px solid black;
+  background-image: url(../images/background.png);
+  background-repeat: no-repeat;
   margin-left: auto;
   margin-right: auto;
-  width: 1000px;
+  width: 886px;
   white-space: wrap;
   overflow-x: auto;
-  overflow-y: auto;
-  height: 620px;
+  overflow-y: hidden;
+  height: 579px;
+  max-height: 579px;
   text-align: center;
-  min-width: 1000px;
+  min-width: 780px;
   font-weight: bold;
-  border-radius: 4px;
-  box-shadow: 10px 10px 8px black;
+  padding-top: 71px;
+  padding-left: 141px;
+  padding-right: 41px;
 }
 #game #gaming {
-  height: 340px;
-  border-bottom: 2px solid black;
-  max-height: 350px;
+  height: 267px;
+  width: 517px;
+  border-bottom: 1px solid #666666;
+  max-height: 267px;
   overflow-y: auto;
+  background-repeat: no-repeat;
+  border-top-right-radius: 5px;
+  background-color: #222222;
   /* TEMPORARY FORMS */
 
 }
@@ -38,12 +45,12 @@ body {
   font-weight: bold;
   margin-left: 2px;
   margin-right: 2px;
-  font-size: 0.9em;
+  font-size: 0.7em;
+  background-color: #myBgColor;
 }
 #game #gaming #create-character table {
   margin-left: auto;
   margin-right: auto;
-  margin-bottom: 10px;
 }
 #game #gaming #create-character table #avatar {
   height: 100px;
@@ -76,11 +83,11 @@ body {
 #game #gaming #create-character .stat-icons {
   position: relative;
   top: 4px;
-  margin-left: 4px;
+  margin-left: 2px;
 }
 #game #gaming #index {
   max-height: 350px;
-  font-size: 0.9em;
+  font-size: 0.7em;
 }
 #game #gaming #index table {
   margin-left: auto;
@@ -90,13 +97,16 @@ body {
   width: 120px;
 }
 #game #map {
+  background-color: #222222;
   float: left;
-  width: 340px;
-  height: 340px;
-  border-bottom: 2px solid black;
-  background-color: #141616;
-  border-right: 2px solid black;
+  width: 267px;
+  height: 267px;
+  border-bottom: 1px solid #666666;
+  border-right: 1px solid #666666;
   position: relative;
+}
+#game #map div {
+  cursor: pointer;
 }
 #game #map canvas {
   position: absolute;
@@ -104,24 +114,18 @@ body {
   left: 0;
   z-index: 0;
 }
-#game #inventory {
-  width: 340px;
-  text-align: center;
-  padding: 0px;
-  margin: 0px;
-  height: 278px;
-  background-color: #141616;
-  float: left;
-  border-right: 4px solid black;
+#game #map img {
+  border-top-left-radius: 5px;
 }
 #game #statistics {
-  background-color: #141616;
-  font-size: 0.9em;
+  background-color: #222222;
+  font-size: 0.7em;
   float: left;
-  width: 324px;
-  height: 278px;
+  width: 267px;
+  height: 235px;
+  max-height: 235px;
   font-weight: bold;
-  border-right: 4px solid black;
+  border-right: 1px solid #666666;
 }
 #game #statistics table {
   margin-left: auto;
@@ -129,27 +133,41 @@ body {
 }
 #game #statistics table td {
   text-align: left;
-  padding-left: 10px;
-  padding-right: 10px;
+  padding-left: 4px;
+  padding-right: 4px;
 }
 #game #statistics .stat-icons {
   position: relative;
   top: 8px;
-  margin-right: 4px;
-  margin-left: 4px;
+  margin-right: 2px;
+  margin-left: 2px;
+}
+#game #inventory {
+  background-color: #222222;
+  width: 274px;
+  text-align: center;
+  padding: 0px;
+  margin: 0px;
+  height: 235px;
+  max-height: 235px;
+  float: left;
+  border-right: 1px solid #666666;
+  border-bottom-left-radius: 5px;
 }
 #game #community {
+  background-color: #222222;
   float: left;
-  width: 328px;
-  height: 278px;
+  width: 242px;
+  height: 235px;
+  max-height: 235px;
+  border-bottom-right-radius: 5px;
 }
 #game #community #players {
-  background-color: #141616;
-  font-size: 0.9em;
+  font-size: 0.8em;
   overflow-y: auto;
   font-weight: bold;
-  height: 147px;
-  max-height: 147px;
+  height: 110px;
+  max-height: 110px;
 }
 #game #community #players p {
   margin-top: 0px;
@@ -161,13 +179,11 @@ body {
   margin-right: 4px;
 }
 #game #community #shoutbox {
-  height: 129px;
-  border-top: 2px solid black;
-  background-color: #141616;
+  height: 150px;
 }
 #game #community #shoutbox div {
-  height: 101px;
-  max-height: 101px;
+  height: 95px;
+  max-height: 95px;
   overflow-y: auto;
 }
 #game #community #shoutbox p {
@@ -182,7 +198,17 @@ body {
   border: 1px solid gray;
   background-color: black;
   margin-top: 4px;
-  width: 320px;
+  width: 230px;
+}
+#game #panel {
+  position: relative;
+  left: 800px;
+  bottom: 410px;
+  width: 10px;
+}
+#game #panel img {
+  width: 90px;
+  height: 310px;
 }
 /* 
 	HIDDEN DIV WITH AVATARS USED TO CREATE CHARACTER
@@ -210,8 +236,8 @@ body {
 	CLASS FOR EVERY AVATAR IN GAME
 */
 .avatars {
-  height: 100px;
-  width: 100px;
+  height: 90px;
+  width: 90px;
   margin-left: 2px;
   margin-right: 2px;
 }
@@ -289,7 +315,7 @@ body {
 }
 .bold-center {
   text-align: center;
-  font-size: 40px;
+  font-size: 25px;
   font-weight: bold;
   margin-left: auto;
   margin-right: auto;
@@ -303,4 +329,7 @@ body {
   background-image: url(../images/here.png);
   background-repeat: no-repeat;
   background-position: center;
+}
+area {
+  cursor: pointer;
 }

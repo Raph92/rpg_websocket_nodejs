@@ -161,9 +161,9 @@ exports.listen = function(server) {
       }).update(
         { $set: { last_login: Date.now() } }
       );
-      setTimeout( function () {
-        makeEvent();
-      }, 4000);
+      // setTimeout( function () {
+        // makeEvent();
+      // }, 4000);
     });
 
 
@@ -378,18 +378,15 @@ exports.statistics = function (req, res) {
         pageHtml += '<br/><img class="avatars" src="../images/faction_' + stalkers.faction + '.png"/></td></tr>';
         pageHtml += '<tr><td>Imię</td><td>' + stalkers.nick + '</td></tr>';
         pageHtml += '<tr><td>Poziom</td><td>' + stalkers.level + '</td></tr>';
-        pageHtml += '<tr><td colspan=2><img class="stat-icons" src="../images/str_icon.png"/>' + stalkers.str;
-        pageHtml += '<img class="stat-icons" src="../images/acc_icon.png"/>' + stalkers.acc;
-        pageHtml += '<img class="stat-icons" src="../images/end_icon.png"/>' + stalkers.end;
-        pageHtml += '</td></tr><tr><td>Dmg: </td><td>' + parseInt(stalkers.str, 10) * 1,5 + '</td></tr>';
+        pageHtml += '<tr><td>Dmg: </td><td>' + parseInt(stalkers.str, 10) * 1,5 + '</td></tr>';
         pageHtml += '<tr><td>Headshoot: </td><td>' + parseInt(stalkers.acc, 10) + '%</td></tr>';
         pageHtml += '<tr><td>Życie: </td><td>' + stalkers.life + '/' + parseInt(stalkers.end) * 20 + ' HP</td></tr>';
+        pageHtml += '<tr><td colspan=2><img class="stat-icons" src="../images/str_icon.png"/>' + stalkers.str;
+        pageHtml += '<img class="stat-icons" src="../images/acc_icon.png"/>' + stalkers.acc;
+        pageHtml += '<img class="stat-icons" src="../images/end_icon.png"/>' + stalkers.end + '</td></tr>';
         pageHtml += '<tr><td colspan=2><img class="stat-icons" src="../images/money.png"/>' + stalkers.money + ' RU</td></tr></table>';
         pageHtml += '<span style="visibility: hidden">' + stalkers.place + '</span>';
       };
-      pageHtml += '<br/><form action="/logout" method="post" accept-charset="utf-8">' + 
-              '<button class="button_input" type="submit">Wyloguj</button>' +
-            '</form>';
       res.writeHead(200, {
         'Content-Type': 'application/json; charset=utf8'});
       res.end(JSON.stringify(pageHtml));

@@ -11,6 +11,7 @@ $(document).ready(function () {
     $.post("socket-connect", function(data) {
       socket.emit('connectMe', data);
       getStatistics(socket);
+      myInterface();
     });
   });
   

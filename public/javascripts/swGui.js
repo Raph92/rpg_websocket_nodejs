@@ -27,6 +27,12 @@ var fsMsg = function (text, delay) {
   $('#fsMsg').fadeIn(1000);  
 };
 
+var myInterface = function () {
+  $('area[title="Wyloguj"]').tooltip({
+    track: true
+  });
+};
+
 /* Write msg received on shoutbox */
 var shoutboxCatchMsg = function (data) {
   $('#shoutbox div')
@@ -37,7 +43,9 @@ var shoutboxCatchMsg = function (data) {
 
 /* Interface for shoutbox, and send msg operation */
 var shoutboxInterface = function(socket) {
-  $('#shoutbox input').keyup(function(e){
+  $('#shoutbox input')
+  .css('visibility', 'visible')
+  .keyup(function(e){
     if (e.keyCode === 13 && $(this).val() !== ''){
       var shoutboxInput = $(this).val();
         socket.emit('msg', shoutboxInput);
@@ -67,20 +75,20 @@ var showPlayers = function (data, socket) {
 };
 
 var loadMap = function (socket) {
-  $('#map').html('<img src="../images/mapa.jpg"/><canvas width="340" height="340" id="can"></canvas>');
-  $('#map').append('<div title="Wysypisko" name="garbage" style="position:absolute;width: 50px;' +
-           'height: 50px; bottom:15px; left: 130px; z-index: 100"></div>' + 
+  $('#map').html('<img src="../images/mapa.jpg"/><canvas width="267" height="267" id="can"></canvas>');
+  $('#map').append('<div title="Wysypisko" name="garbage" style="position:absolute;width: 45px;' +
+           'height: 45px; bottom:10px; left: 100px; z-index: 100"></div>' + 
            '<div title="Bar" name="rostok" style="position:absolute;width:30px;height:30px;' +
-           'top: 165px; left: 140px; z-index: 100"></div>' +
-           '<div title="Jantar" name="yantar" style="position:absolute;width:30px;height:40px;' +
-           'top: 190px; left: 45px; z-index: 100"></div>' +
-           '<div title="Agroprom" name="agroprom" style="position:absolute;width:40px;height:40px;' +
-           'top: 295px; left: 60px; z-index: 100"></div>' +
-           '<div title="Czarna Dolina" name="darkvalley" style="position:absolute;width:60px;height:80px;' +
-           'top: 240px; left: 235px; z-index: 100"></div>');
+           'top: 130px; left: 110px; z-index: 100"></div>' +
+           '<div title="Jantar" name="yantar" style="position:absolute;width:25px;height:35px;' +
+           'top: 150px; left: 35px; z-index: 100"></div>' +
+           '<div title="Agroprom" name="agroprom" style="position:absolute;width:35px;height:35px;' +
+           'top: 230px; left: 45px; z-index: 100"></div>' +
+           '<div title="Czarna Dolina" name="darkvalley" style="position:absolute;width:55px;height:75px;' +
+           'top: 190px; left: 180px; z-index: 100"></div>');
   // First place load
   $('div[name="' + $('#statistics span').text() + '"]').fadeOut(0).addClass('actual-place').fadeIn(2000);
-  $('#gaming').fadeOut(0).css('background-image', 'url(../images/' + $('#statistics span').text() + '.jpg)').fadeIn(1000);
+  $('#gaming').fadeOut(0).css('background-image', 'url(../images/' + $('#statistics span').text() + '.jpg)').fadeIn(0);
   
   /* Function to calculate divs center */
   var divCenters = function () { 
@@ -143,7 +151,7 @@ var loadMap = function (socket) {
     $('#can').fadeOut(2000);
     
     // Load place background to gaming div
-    $('#gaming').fadeOut(0).css('background-image', 'url(../images/' + $('div.actual-place').attr('name') + '.jpg)').fadeIn(2500);
+    $('#gaming').fadeOut(0).css('background-image', 'url(../images/' + $('div.actual-place').attr('name') + '.jpg)').fadeIn(0);
     
     socket.emit('travel', { where: $('div.actual-place').attr('name') });
     
