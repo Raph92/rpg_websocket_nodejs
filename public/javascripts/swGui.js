@@ -5,13 +5,20 @@ var myPopup = function (text, delay) {
     $('#myPopup').remove();  
   };        
   $('body').append('<div id="myPopup" style="display : none;">' 
-  + text + '</div>');    
+  + text + '<input class="button_input" type=button id="close_popup" value="X"></input></div>');    
   
   $('#myPopup').css({  'left': '150px', 'top' : '150px', 'height' : '340px', 'width' : '340px' });    
   
-  setTimeout( function () {
+  $('#close_popup').click(function () {
     $('#myPopup').remove();
-  }, delay);
+  
+  });
+  
+  if (delay) {
+    setTimeout( function () {
+      $('#myPopup').remove();
+    }, delay);
+  };
   
   $('#myPopup').fadeIn(100);  
 };
@@ -51,7 +58,8 @@ var shoutboxInterface = function(socket) {
         socket.emit('msg', shoutboxInput);
       $(this).val('');
     };
-  }).focus();
+  // }).focus();
+  });
 };
 
 var getStatistics = function (socket) {
@@ -74,9 +82,51 @@ var showPlayers = function (data, socket) {
   runBattleScripts(socket);
 };
 
+var divCenters = function (div) { 
+  var divLeft, 
+    divWidth,
+    divTop,
+    divHeight;
+  
+  divLeft = div.css('left');
+  divLeft = parseInt(divLeft.slice(0, divLeft.length - 2), 10);
+  divWidth = div.css('width');
+  divWidth = parseInt(divWidth.slice(0, divWidth.length -2), 10);
+  
+  divTop = div.css('top');
+  divTop = parseInt(divTop.slice(0, divTop.length - 2), 10 );
+  divHeight = div.css('height');
+  divHeight = parseInt(divHeight.slice(0, divHeight.length - 2), 10);
+  
+  var point = [];
+  point.push(divLeft + divWidth /2); // x
+  point.push(divTop + divHeight /2); // y
+  return point;
+};
+  
+/* Draw lines between divs (ax,ay,bx,by) */
+var drawLines = function ( points , canvas) { 
+  var canvas = document.getElementById(canvas);
+  if (canvas.getContext) {
+    var c = canvas.getContext('2d');
+      c.clearRect(0,0,canvas.width,canvas.height);
+      var gradient = c.createLinearGradient(points[0],points[1],points[2],points[3]);
+      gradient.addColorStop("0","#FFFFFF");
+      c.lineCap = 'round';
+      c.lineWidth = 3;
+      c.beginPath();
+      c.moveTo(points[0],points[1]);
+      c.lineTo(points[2],points[3]);
+      c.strokeStyle = gradient;
+      c.arc(points[2],points[3],3,0,Math.PI*2,true);
+      c.stroke();
+  };
+};
+
 var loadMap = function (socket) {
-  $('#map').html('<img src="../images/mapa.jpg"/><canvas width="267" height="267" id="can"></canvas>');
-  $('#map').append('<div title="Wysypisko" name="garbage" style="position:absolute;width: 45px;' +
+  $('#map').html('<img src="../images/mapa.jpg"/><canvas width="267" height="267" id="can"></canvas>')
+           .css('background', 'transparent')
+           .append('<div title="Wysypisko" name="garbage" style="position:absolute;width: 45px;' +
            'height: 45px; bottom:10px; left: 100px; z-index: 100"></div>' + 
            '<div title="Bar" name="rostok" style="position:absolute;width:30px;height:30px;' +
            'top: 130px; left: 110px; z-index: 100"></div>' +
@@ -91,45 +141,7 @@ var loadMap = function (socket) {
   $('#gaming').fadeOut(0).css('background-image', 'url(../images/' + $('#statistics span').text() + '.jpg)').fadeIn(0);
   
   /* Function to calculate divs center */
-  var divCenters = function () { 
-    var divLeft, 
-      divWidth,
-      divTop,
-      divHeight,
-      $divToCalc;
-    
-    $divToCalc = $('div.actual-place');
-    
-    divLeft = $divToCalc.css('left');
-    divLeft = parseInt(divLeft.slice(0, divLeft.length - 2), 10);
-    divWidth = $divToCalc.css('width');
-    divWidth = parseInt(divWidth.slice(0, divWidth.length -2), 10);
-    
-    divTop = $divToCalc.css('top');
-    divTop = parseInt(divTop.slice(0, divTop.length - 2), 10 );
-    divHeight = $divToCalc.css('height');
-    divHeight = parseInt(divHeight.slice(0, divHeight.length - 2), 10);
-    
-    var point = [];
-    point.push(divLeft + divWidth /2); // x
-    point.push(divTop + divHeight /2); // y
-    return point;
-  };
-    
-  /* Draw lines between divs (ax,ay,bx,by) */
-  var drawTravelLines = function ( points ) { 
-    var canvas = document.getElementById('can');
-    if (canvas.getContext) {
-      var c = canvas.getContext('2d');
-        c.clearRect(0,0,340,340);
-        c.lineCap = 'round';
-        c.lineWidth = 3;
-        c.beginPath();
-        c.moveTo(points[0],points[1]);
-        c.lineTo(points[2],points[3]);
-        c.stroke();
-    };
-  };
+  
   
   /* Function fun after click on another place */
   var travel = function () { 
@@ -142,12 +154,12 @@ var loadMap = function (socket) {
     }, 3000);  
     
     $('#can').fadeIn(0);
-    var cords = divCenters(); // Cords of previous div
+    var cords = divCenters($('div.actual-place')); // Cords of previous div
     
     $('div.actual-place').fadeOut(0).removeClass('actual-place').fadeIn(0);
     $(this).fadeOut(0).addClass('actual-place').fadeIn(1000);
     
-    drawTravelLines(cords.concat(divCenters())); // Draw lines beetwen old and new div
+    drawLines(cords.concat(divCenters($('div.actual-place'))), 'can'); // Draw lines beetwen old and new div
     $('#can').fadeOut(2000);
     
     // Load place background to gaming div

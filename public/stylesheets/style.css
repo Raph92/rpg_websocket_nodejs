@@ -33,12 +33,20 @@ body {
   width: 517px;
   border-bottom: 1px solid #666666;
   max-height: 267px;
-  overflow-y: auto;
+  overflow-y: hidden;
+  overflow-x: hidden;
   background-repeat: no-repeat;
   border-top-right-radius: 5px;
   background-color: #222222;
+  position: relative;
   /* TEMPORARY FORMS */
 
+}
+#game #gaming canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
 }
 #game #gaming #create-character {
   text-align: center;
@@ -97,13 +105,13 @@ body {
   width: 120px;
 }
 #game #map {
-  background-color: #222222;
   float: left;
   width: 267px;
   height: 267px;
   border-bottom: 1px solid #666666;
   border-right: 1px solid #666666;
   position: relative;
+  background-color: #222222;
 }
 #game #map div {
   cursor: pointer;
@@ -122,10 +130,11 @@ body {
   font-size: 0.7em;
   float: left;
   width: 267px;
-  height: 235px;
-  max-height: 235px;
+  height: 236px;
+  max-height: 236px;
   font-weight: bold;
   border-right: 1px solid #666666;
+  border-bottom-left-radius: 5px;
 }
 #game #statistics table {
   margin-left: auto;
@@ -152,7 +161,6 @@ body {
   max-height: 235px;
   float: left;
   border-right: 1px solid #666666;
-  border-bottom-left-radius: 5px;
 }
 #game #community {
   background-color: #222222;
@@ -245,6 +253,9 @@ body {
 	STYLE FOR MY JAVASCRIPT POPUP
 */
 #myPopup {
+  color: white;
+  font-size: 1.5em;
+  font-weight: bold;
   background-color: #222222;
   border: 3px solid #444444;
   padding-top: 5px;
@@ -261,14 +272,18 @@ body {
   position: absolute;
   right: 5px;
   top: 5px;
+  width: 25px;
+  height: 25px;
 }
 #fsMsg {
   position: absolute;
   z-index: 1000;
-  font-size: 3em;
+  font-size: 2.5em;
   color: white;
-  left: 145px;
-  top: 5px;
+  left: 246px;
+  top: 40px;
+  width: 268px;
+  color: red;
   background-color: rgba(34, 34, 34, 0.8);
 }
 /* 
@@ -332,4 +347,9 @@ body {
 }
 area {
   cursor: pointer;
+}
+.counter {
+  padding-right: 5px;
+  font-size: 1.5em;
+  font-weight: bold;
 }

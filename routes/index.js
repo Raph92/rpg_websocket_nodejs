@@ -12,6 +12,14 @@ var stalkerToSocket = {},
     usersAllowed = {},
     stalkerLocation = {},
     stalkersInBattle = {},
+    actualEvent = {
+      players : {},
+      time : 0,
+      reward : 0,
+      rewardText : '',
+      penalty : 0,
+      penaltyText : ''
+    },
     fightCount = 0;
 
 
@@ -52,40 +60,55 @@ exports.listen = function(server) {
   io.set('log level', 1);
   
   // EVENTS START
-  
   // setInterval( function () { 
     // makeEvent();
-  // }, 5000);
+  // }, 600000);
   
   var makeEvent = function () {
-    var availableEvents = ['snork'];
+    var availableEvents = ['radiation'],
+        eventToMake = availableEvents[Math.floor(Math.random() * 10) % availableEvents.length];
     
     var choosePlayers = function (eventType) {
-      var who = [];
+      var count = 0;
       for (var x in socketToStalker) {
+        count += 1;
         if ( Math.random() > 0.5 ) {
-          who.push(x);
+          actualEvent.players[socketToStalker[x]] = x;
         } else {
-          who.push(x);
+          actualEvent.players[socketToStalker[x]] = x;
         }
       };
-      for (var i = 0; i < who.length; i += 1) {
-        io.sockets.socket(who[i]).emit('server-event', eventType);
+      for (var x in actualEvent.players) {
+        io.sockets.socket(actualEvent.players[x]).emit('server-event', eventType.name);
       };
+      
+      setTimeout(function () {
+        for (var x in actualEvent.players) {
+        Stalker.findOne({ 'nick' : x}, function (err, stalker) {
+        }).update(
+          { $inc: { money: -100  } }
+        );
+        io.sockets.socket(actualEvent.players[x]).emit('event-statistics', {'msg': eventType.penaltyText, 'stat' : 0});
+      };
+      
+      }, eventType.time);
+      
     };
     
     var chooseEvent = function (event_data) {
       if (event_data) {
         var eventData = event_data;
+        actualEvent.time = eventData.time;
+        actualEvent.reward = eventData.reward;
+        actualEvent.penalty = eventData.penalty;
+        actualEvent.rewardText = eventData.rewardText;
+        actualEvent.penaltyText = eventData.penaltyText;
         choosePlayers(eventData);
       } else {
-        EventSchema.findOne({'id' : availableEvents[0]}, function (err, eventSchema) {
+        EventSchema.findOne({'id' : eventToMake}, function (err, eventSchema) {
           var prepare = {};  
               prepare.name        = eventSchema.name;
-              prepare.info        = eventSchema.info;
-              prepare.bg          = eventSchema.bg;
               prepare.time        = eventSchema.time;
-              prepare.speed       = eventSchema.speed;
               prepare.reward      = eventSchema.reward;
               prepare.rewardText  = eventSchema.rewardText;
               prepare.penalty     = eventSchema.penalty;
@@ -96,12 +119,6 @@ exports.listen = function(server) {
     };
       
     chooseEvent();
-    
-    
-    
-    // CZEKANIE NA WYNIKI ZABIJANIA !!!
-    
-    
   };
   // END OF MAKE EVENTS
   
@@ -163,12 +180,17 @@ exports.listen = function(server) {
       );
       // setTimeout( function () {
         // makeEvent();
-      // }, 4000);
+      // }, 5000);
     });
-
-
-
-
+    
+    socket.on('rescue', function (data) {
+      Stalker.findOne({ 'nick' : socketToStalker[socket.id]}, function (err, stalker) {
+      }).update(
+        { $inc: { money: data*10 + actualEvent.reward } }
+      );
+      socket.emit('event-statistics', {'msg' : actualEvent.rewardText, 'stat' : 1});
+      delete actualEvent.players[socketToStalker[socket.id]];
+    });
 
     // FIGHTS
     socket.on('fightWithMe', function (data){
@@ -268,14 +290,16 @@ exports.login = function (req, res) {
 
 // LOGOUT
 exports.logout = function (req, res) {
-  delete socketToStalker[stalkerToSocket[req.session.account]];
-  delete stalkerToSocket[req.session.account];
-    for (var x in usersAllowed) {
-      if(usersAllowed[x] === req.session.account) {
-        delete usersAllowed[x];
-      }
-    };
+  if (req.session.account) {
+    delete socketToStalker[stalkerToSocket[req.session.account]];
+    delete stalkerToSocket[req.session.account];
+      for (var x in usersAllowed) {
+        if(usersAllowed[x] === req.session.account) {
+          delete usersAllowed[x];
+        }
+      };
   req.session.account = null;
+  };
   res.redirect('/');
 };
 
