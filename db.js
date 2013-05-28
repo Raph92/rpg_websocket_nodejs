@@ -18,7 +18,12 @@ var Stalker = new Schema({
 	acc			    : Number,
 	end			    : Number,
 	life		    : Number,
-	place		    : String
+	place		    : String,
+  weapon      : Number,
+  armor       : Number,
+  scope       : Number,
+  energetic   : Number,
+  vodka       : Number
 });
 // Stalker.methods.calcStats = function() {
 	// this.dmg = parseInt(this.str, 10) * 1.5;

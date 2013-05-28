@@ -87,9 +87,18 @@ exports.listen = function(server) {
       setTimeout(function () {
         for (var x in actualEvent.players) {
         Stalker.findOne({ 'nick' : x}, function (err, stalker) {
-        }).update(
-          { $inc: { money: -100  } }
-        );
+          if (stalker.money > 0) {
+            Stalker.findOne({ 'nick' : x}, function (err, stalker) {
+            }).update(
+              { $inc: { money: -100  } }
+            );
+          } else {
+            Stalker.findOne({ 'nick' : x}, function (err, stalker) {
+            }).update(
+              { $set: { money: 0  } }
+            );
+          };
+        });
         io.sockets.socket(actualEvent.players[x]).emit('event-statistics', {'msg': eventType.penaltyText, 'stat' : 0});
       };
       
@@ -168,8 +177,8 @@ exports.listen = function(server) {
       };
     };
   
-    /* Set of operations to do after login, link stalker(nick) with current socket id,
-       load last visited location(room), and print information about last login time  */
+    /* SET OF OPERATIONS TO DO AFTER LOGIN, LINK STALKER(NICK) WITH CURRENT SOCKET ID,
+       LOAD LAST VISITED LOCATION(ROOM), AND PRINT INFORMATION ABOUT LAST LOGIN TIME  */
     socket.on('connectMe', function (data) {
       stalkerToSocket[data] = socket.id;
       socketToStalker[socket.id] = data;
@@ -179,9 +188,9 @@ exports.listen = function(server) {
       }).update(
         { $set: { last_login: Date.now() } }
       );
-      setTimeout( function () {
-        makeEvent();
-      }, 5000);
+      // setTimeout( function () {
+        // makeEvent();
+      // }, 5000);
     });
     
     socket.on('rescue', function (data) {
@@ -223,6 +232,46 @@ exports.listen = function(server) {
                { $set: { place: data.where } }
              );
       placeMe(data.where);
+    });
+    
+    socket.on('shooping', function (data) {
+      Stalker.findOne({ 'nick' : socketToStalker[socket.id]}, function(err,stalkers){
+        if (data === 'weapon' || data === 'armor' || data === 'scope') {
+          if (stalkers.money >= 500) {
+            var upd;
+            if(data === 'weapon') {
+              upd = { money: -500, weapon: 1, str: 1};
+            } else if (data === 'scope') {
+              upd = { money: -500, scope: 1, acc: 1};
+            } else {
+              upd = { money: -500, armor: 1, end: 1, life: 20};
+            };
+            Stalker.findOne({ 'nick' : socketToStalker[socket.id]}, function(err,stalkers){})
+                   .update(
+                     { $inc: upd }
+                   );
+            socket.emit('shopping-result', 1);
+          } else {
+            socket.emit('shopping-result', 0);
+          };
+        } else {
+          var upd;
+          if (stalkers.money >= 500) {
+            if(data === 'energetic') {
+              upd = { money: -50, energetic: 1 };
+            } else {
+              upd = { money: -50, vodka: 1 };
+            };
+            Stalker.findOne({ 'nick' : socketToStalker[socket.id]}, function(err,stalkers){})
+                   .update(
+                     { $inc:  upd  }
+                   );
+            socket.emit('shopping-result', 1);
+          } else {
+            socket.emit('shopping-result', 0);
+          };
+        };
+      });
     });
     
     socket.on('msg', function (data){
@@ -379,18 +428,23 @@ exports.getCharacterSchema = function (req, res) {
 // CREATE STALKER - MONGO FUNCTION
 exports.createStalker = function (req, res) {
   new Stalker({
-    nick        : req.body.nickname,
-    avatar      : req.body.avatar,
-    last_login  : Date.now(),
-    level        : 1,
-    money        : 100,
-    points      : 0,
-    faction      : req.body.faction,
-    str          : parseInt(req.body.strength, 10),
-    acc          : parseInt(req.body.accuracy, 10),
-    end          : parseInt(req.body.endurance, 10),
-    life        : parseInt(req.body.endurance, 10) * 20,
-    place        : 'rostok',
+    nick          : req.body.nickname,
+    avatar        : req.body.avatar,
+    last_login    : Date.now(),
+    level         : 1,
+    money         : 100,
+    points        : 0,
+    faction       : req.body.faction,
+    str           : parseInt(req.body.strength, 10),
+    acc           : parseInt(req.body.accuracy, 10),
+    end           : parseInt(req.body.endurance, 10),
+    life          : parseInt(req.body.endurance, 10) * 20,
+    place         : 'rostok',
+    weapon        : 0,
+    armor         : 0,
+    scope         : 0,
+    energetic     : 0,
+    vodka         : 0
   }).setPassword(req.body.password)
     .save(function (err, count) {
     if (err) {
@@ -411,24 +465,31 @@ exports.createStalker = function (req, res) {
 exports.statistics = function (req, res) {
   if (req.session.account) {
     Stalker.findOne({'nick' : req.session.account}, function (err, stalkers){
-      var pageHtml = '';
+      var statHTML = '';
       if(stalkers) {
-        pageHtml += '<table><tr><td></td><td></td><td rowspan=8><img class="avatars" src="' + stalkers.avatar + '"/>';
-        pageHtml += '<br/><img class="avatars" src="../images/faction_' + stalkers.faction + '.png"/></td></tr>';
-        pageHtml += '<tr><td>Imię</td><td>' + stalkers.nick + '</td></tr>';
-        pageHtml += '<tr><td>Poziom</td><td>' + stalkers.level + '</td></tr>';
-        pageHtml += '<tr><td>Dmg: </td><td>' + parseInt(stalkers.str, 10) * 1,5 + '</td></tr>';
-        pageHtml += '<tr><td>Headshoot: </td><td>' + parseInt(stalkers.acc, 10) + '%</td></tr>';
-        pageHtml += '<tr><td>Życie: </td><td>' + stalkers.life + '/' + parseInt(stalkers.end) * 20 + ' HP</td></tr>';
-        pageHtml += '<tr><td colspan=2><img class="stat-icons" src="../images/str_icon.png"/>' + stalkers.str;
-        pageHtml += '<img class="stat-icons" src="../images/acc_icon.png"/>' + stalkers.acc;
-        pageHtml += '<img class="stat-icons" src="../images/end_icon.png"/>' + stalkers.end + '</td></tr>';
-        pageHtml += '<tr><td colspan=2><img class="stat-icons" src="../images/money.png"/>' + stalkers.money + ' RU</td></tr></table>';
-        pageHtml += '<span style="visibility: hidden">' + stalkers.place + '</span>';
+        var statistics = {
+          avatar  : stalkers.avatar,
+          faction : stalkers.faction,
+          nick    : stalkers.nick,
+          level   : stalkers.level,
+          dmg     : parseInt(stalkers.str, 10) * 1.5,
+          head    : parseInt(stalkers.acc, 10),
+          life    : stalkers.life + '/' + parseInt(stalkers.end) * 20,
+          str     : stalkers.str,
+          acc     : stalkers.acc,
+          end     : stalkers.end,
+          money   : stalkers.money,
+          place   : stalkers.place,
+          weapon  : stalkers.weapon,
+          armor   : stalkers.armor,
+          scope   : stalkers.scope,
+          energetic : stalkers.energetic,
+          vodka   : stalkers.vodka
+        };
       };
       res.writeHead(200, {
         'Content-Type': 'application/json; charset=utf8'});
-      res.end(JSON.stringify(pageHtml));
+      res.end(JSON.stringify(statistics));
     });
   } else {
     res.writeHead(200, {

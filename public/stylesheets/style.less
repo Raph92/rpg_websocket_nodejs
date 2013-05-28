@@ -164,12 +164,30 @@ body {
 		width: 274px;
 		text-align: center;
 		padding: 0px;
+		padding-top: 2px;
+		padding-bottom: 2px;
 		margin: 0px;
-		height: 235px;
+		height: 231px;
 		max-height: 235px;
 		float: left;
 		border-right: 1px solid @myBorderColor;
-		
+		position: relative;
+		.item {
+			border: 1px solid #79796A;
+			background-color: #111111;
+		}
+		table {
+			margin-left: auto;
+			margin-right: auto;
+		}
+		span { 
+			width: 20px;
+			height: 20px;
+			color: white;
+			border: 1px solid gray;
+			background-color: black;
+			border-radius: 5px;
+		}
 	}
 	
 	#community {
@@ -245,8 +263,8 @@ body {
 	padding-bottom : 5px;
 	padding-right : 30px;
 	position: absolute;
-	top:  250px;
-	left: 500px;
+	top:  20px;
+	left: 20px;
 	box-shadow : 5px 5px 10px 10px #000000;
 	width: 320px;
 	height: 205px;
@@ -372,7 +390,7 @@ body {
 	background-position:center; 
 }
 
-area {
+.area {
 	cursor:pointer;
 }
 

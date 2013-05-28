@@ -1,20 +1,24 @@
 'use strict';
 /* Popup window generator */
-var myPopup = function (text, delay) {    
+var myPopup = function (text, delay, height, width) {    
+  var popupHeight = height  || '340',
+      popupWidth  = width   || '340';
+  
   if ($('body').find('#myPopup').html() !== undefined) {
     $('#myPopup').remove();  
   };        
   $('body').append('<div id="myPopup" style="display : none;">' 
   + text + '<input class="button_input" type=button id="close_popup" value="X"></input></div>');    
   
-  $('#myPopup').css({  'left': '150px', 'top' : '150px', 'height' : '340px', 'width' : '340px' });    
+  $('#myPopup').css({  'left': '250px', 'top' : '150px', 'height' : popupHeight + 'px', 
+                       'width' : popupWidth + 'px' });    
   
   $('#close_popup').click(function () {
     $('#myPopup').remove();
   
   });
   
-  if (delay) {
+  if (delay !== 0) {
     setTimeout( function () {
       $('#myPopup').remove();
     }, delay);
@@ -62,10 +66,45 @@ var shoutboxInterface = function(socket) {
   });
 };
 
-var getStatistics = function (socket) {
+var getStatistics = function (socket, mapLoader) {
   $.getJSON("/statistics", function(data) {
-    $('#statistics').html(data);
-    loadMap(socket);
+    $('#statistics').html('<table><tr><td></td><td></td><td rowspan=8><img class="avatars" src="' + 
+                          data.avatar + '"/><br/><img class="avatars" src="../images/faction_' + 
+                          data.faction + '.png"/></td></tr><tr><td>Imię</td><td>' + 
+                          data.nick + '</td></tr><tr><td>Poziom</td><td>' + 
+                          data.level + '</td></tr><tr><td>Dmg: </td><td>' + 
+                          parseInt(data.str, 10) * 1.5 + '</td></tr><tr><td>Headshoot: </td><td>' + 
+                          parseInt(data.acc, 10) + '%</td></tr><tr><td>Życie: </td><td>' + 
+                          data.life + 
+                          ' HP</td></tr><tr><td colspan=2><img class="stat-icons" src="../images/str_icon.png"/>' + data.str + '<img class="stat-icons" src="../images/acc_icon.png"/>' + 
+                          data.acc + '<img class="stat-icons" src="../images/end_icon.png"/>' + 
+                          data.end + '</td></tr>' + '<tr><td colspan=2><img class="stat-icons"' +
+                          'src="../images/money.png"/>' + data.money + ' RU</td></tr></table>' +
+                          '<span style="visibility: hidden">' + data.place + '</span>');
+    $('#inventory').html('<table><tr><td colspan="3"><img name="weapon" title="Karabin" class="item" ' +
+                         'src="../images/ak_weapon.png"></img></td></tr><tr><td>' +
+                         '<img name="armor" title="Pancerz" class="item" src="../images/armor_' + data.faction + '.png"></img></td>' + 
+                         '<td><img name="scope" title="Trafiaj tam gdzie chcesz" class="item"' + 
+                         'src="../images/scope.png"></img><img name="energetic" ' +
+                         'title="Daje niezłego kopa" class="item"' +
+                         ' src="../images/potion_str.png" style="margin-top:20px;"></img></td><td><img name="vodka" title="Żeby ręce nie latały..." class="item"' + 
+                         'src="../images/potion_acc.png"></img></td></tr></table>' + 
+                         '<span style="position: absolute; left: 240px; top: 55px;">' + data.weapon + '</span>' + 
+                         '<span style="position: absolute; left: 80px; top: 205px;">' + data.armor + '</span>' + 
+                         '<span style="position: absolute; left: 190px; top: 125px;">' + data.scope + '</span>' + 
+                         '<span style="position: absolute; left: 172px; top: 192px;">' + data.energetic + '</span>' +
+                         '<span style="position: absolute; left: 208px; top: 185px;">' + data.vodka + '</span>')
+                  .tooltip({
+                    track: true
+                  });
+    
+    $('#inventory img').click(function (){
+      socket.emit('shooping', $(this).attr('name'));
+    });
+    
+    if(mapLoader === undefined) {
+      loadMap(socket);
+    };
   });
 };
 
