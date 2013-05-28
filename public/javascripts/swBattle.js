@@ -24,7 +24,6 @@ var attackOrRun = function (data) {
 	
 	
 	
-	
 	var myPopup = function (text, height, width, delay) {		
 	if ($('body').find('#myPopup').html() !== undefined) {
 		$('#myPopup').remove();	

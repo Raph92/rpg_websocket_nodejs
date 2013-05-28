@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 var Schema   = mongoose.Schema,
-	crypto	 = require('crypto');
+    crypto	 = require('crypto');
 
 	
 // PLAYERS TABLE
@@ -99,7 +99,6 @@ var createEventSchemas = function () {
   new EventSchema({
     id          : 'radiation',
     name        : 'Wyładowanie',
-    time        : 10000,
     reward      : 100,
     rewardText  : 'Przeżyłeś, udało Ci się schować na czas, ten za nami nie miał tyle szczęścia, ale za to zgubił niezłego fanta, ' +
                   'trzymaj, podzielimy się.',

@@ -66,8 +66,9 @@ exports.listen = function(server) {
   
   var makeEvent = function () {
     var availableEvents = ['radiation'],
-        eventToMake = availableEvents[Math.floor(Math.random() * 10) % availableEvents.length];
-    
+        eventToMake = availableEvents[Math.floor(Math.random() * 10) % availableEvents.length],
+        eventTime = ((Math.floor(Math.random() * 100) % 15) + 10) * 1000;
+        
     var choosePlayers = function (eventType) {
       var count = 0;
       for (var x in socketToStalker) {
@@ -79,7 +80,8 @@ exports.listen = function(server) {
         }
       };
       for (var x in actualEvent.players) {
-        io.sockets.socket(actualEvent.players[x]).emit('server-event', eventType.name);
+        io.sockets.socket(actualEvent.players[x]).emit('server-event', {'name' : eventType.name, 
+                                                                        'time' : eventTime});
       };
       
       setTimeout(function () {
@@ -91,14 +93,13 @@ exports.listen = function(server) {
         io.sockets.socket(actualEvent.players[x]).emit('event-statistics', {'msg': eventType.penaltyText, 'stat' : 0});
       };
       
-      }, eventType.time);
+      }, eventTime);
       
     };
     
     var chooseEvent = function (event_data) {
       if (event_data) {
         var eventData = event_data;
-        actualEvent.time = eventData.time;
         actualEvent.reward = eventData.reward;
         actualEvent.penalty = eventData.penalty;
         actualEvent.rewardText = eventData.rewardText;
@@ -178,9 +179,9 @@ exports.listen = function(server) {
       }).update(
         { $set: { last_login: Date.now() } }
       );
-      // setTimeout( function () {
-        // makeEvent();
-      // }, 5000);
+      setTimeout( function () {
+        makeEvent();
+      }, 5000);
     });
     
     socket.on('rescue', function (data) {
@@ -200,6 +201,20 @@ exports.listen = function(server) {
         io.sockets.socket(stalkerToSocket[data]).emit('wantYouFight', { who: socketToStalker[socket.id] } );
       };
       // socket.join(room);
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
     });
     
     socket.on('travel', function (data) {

@@ -14,6 +14,24 @@ $(document).ready(function () {
     });
   });
   
+  socket.on('wantYouFight', function(data) {
+    attackOrRun(data);
+  });
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   socket.on('server-event', function(data) {
@@ -46,21 +64,23 @@ $(document).ready(function () {
         };
       };
       
+      fsMsg(data.name, 5000);
+      
       var playerColumn = giveRand(),
           bunkerColumn = giveRand(),
           monsterPositions = [],
           cratesPositions = [],
-          eventMap = [],
+          mapMask = [],
           tempMap = [],
           killCounter = 0;
           giveRand(monsterPositions);
-          giveRand(cratesPositions);
+          // giveRand(cratesPositions);
       
       for (var i = 0; i < 6; i += 1) {
         for (var j = 0; j < 12; j += 1) {
           tempMap.push(0);
         };
-        eventMap[i] = tempMap;
+        mapMask[i] = tempMap;
         tempMap = [];
       };
       
@@ -73,12 +93,20 @@ $(document).ready(function () {
                       'left: ' + playerColumn * 42 + 'px; top: ' + 5 * 42 + 'px"><img class="playerImg"' + 
                       'src="../images/eventModelR.png" style="position: relative; bottom: 50px"></img></div>';
       $('#gaming').append(playerDiv);
+      // KILL COUNTER
       $('#gaming').append('<span class="counter" style="position: absolute; bottom: 0px; right: 0px"></span>');
       $('.counter').text(killCounter);
       
+      $('#gaming').append('<span class="timer" style="position:absolute; bottom: 0px; left: 0px"></span>')
+      $('.timer').text((data.time / 1000) + 's');
+      
+      var timerUpdater = setInterval(function () {
+        data.time -= 1000;
+        $('.timer').text((data.time / 1000) + 's');
+      }, 1000);
       
       $('.player').focus();
-      eventMap[5][playerColumn] =  1;
+      mapMask[5][playerColumn] =  1;
       
       // BUNKER PLACE
       var bunkerDiv = '<div class="bunker" style="z-index: 0; display: inline-block; width: 40px; height: 40px; ' +
@@ -90,14 +118,13 @@ $(document).ready(function () {
       
       var monstersDiv = '';
       for (var i = 0; i < monsterPositions.length; i += 1) {
-        
-        if ( eventMap[monsterPositions[i][0]][monsterPositions[i][1]] !== -1 ) {
+        if ( mapMask[monsterPositions[i][0]][monsterPositions[i][1]] !== -1 ) {
           var snorkType = Math.random() > 0.5 ? '1' : '';
           monstersDiv += '<div id="monstr' + monsterPositions[i][1] + '-' + monsterPositions[i][0] + '" class="monsters"' +
                          'style="background-repeat:no-repeat;z-index: 0; display: inline-block; width: 40px; height: 40px; ' +
                          'position: absolute; left: ' + monsterPositions[i][1] * 42 + 'px; top: ' + monsterPositions[i][0] * 42 +
                          'px; background-image: url(../images/snork' + snorkType + '.png)"></div>';
-          eventMap[monsterPositions[i][0]][monsterPositions[i][1]] = -1;
+          mapMask[monsterPositions[i][0]][monsterPositions[i][1]] = -1;
         };
       };
       
@@ -119,11 +146,11 @@ $(document).ready(function () {
               var pos = idUnparse($('.player')),
                   x = pos.x,
                   y = pos.y;
-              if (eventMap[y][x - 1] !== -1) {
+              if (mapMask[y][x - 1] !== -1) {
                 $('.playerImg').attr('src', '../images/eventModelL.png');
-                eventMap[y][x] = 0;
+                mapMask[y][x] = 0;
                 x -= 1;
-                eventMap[y][x] = 1;
+                mapMask[y][x] = 1;
                 $('.player').attr('id', 'player' + x + '-' + y).animate({"left": "-=42px"}, 250);
               };
             };
@@ -134,10 +161,10 @@ $(document).ready(function () {
               var pos = idUnparse($('.player')),
                   x = pos.x,
                   y = pos.y;
-              if (eventMap[y - 1][x] !== -1) {
-                eventMap[y][x] = 0;
+              if (mapMask[y - 1][x] !== -1) {
+                mapMask[y][x] = 0;
                 y -= 1;
-                eventMap[y][x] = 1;
+                mapMask[y][x] = 1;
                 $('.player').attr('id', 'player' + x + '-' + y).animate({"top": "-=42px"}, 250);
               };
             };
@@ -148,11 +175,11 @@ $(document).ready(function () {
               var pos = idUnparse($('.player')),
                   x = pos.x,
                   y = pos.y;
-              if (eventMap[y][x + 1] !== -1) { 
+              if (mapMask[y][x + 1] !== -1) { 
                 $('.playerImg').attr('src', '../images/eventModelR.png');
-                eventMap[y][x] = 0;
+                mapMask[y][x] = 0;
                 x += 1;
-                eventMap[y][x] = 1;
+                mapMask[y][x] = 1;
                 $('.player').attr('id', 'player' + x + '-' + y).animate({"left": "+=42px"}, 250);
               };
             };
@@ -163,10 +190,10 @@ $(document).ready(function () {
              var pos = idUnparse($('.player')),
                   x = pos.x,
                   y = pos.y;
-              if (eventMap[y + 1][x] !== -1) {
-                eventMap[y][x] = 0;
+              if (mapMask[y + 1][x] !== -1) {
+                mapMask[y][x] = 0;
                 y += 1;
-                eventMap[y][x] = 1;
+                mapMask[y][x] = 1;
                 $('.player').attr('id', 'player' + x + '-' + y).animate({"top": "+=42px"}, 250);
               };
             };
@@ -182,6 +209,7 @@ $(document).ready(function () {
           bunkerColumn = -1;
           $('#gaming').unbind('keydown');
           $('.monsters').unbind('click');
+          clearInterval(timerUpdater);
         };
       };
       
@@ -215,16 +243,16 @@ $(document).ready(function () {
         
         monster.css('background-image', 'url(../images/blood.png)'); // SMASH MONSTER!
         
-        var cords = idUnparse(monster);
-        eventMap[cords.y][cords.x] = 0;
-        
-        killCounter += 1;
-        $('.counter').text(killCounter);
-        
         setTimeout(function () {
           monster.remove(); // REMOVE, AFTER BLOOD MASSACRE
           $('.player').focus();
         }, 300);
+        
+        var cords = idUnparse(monster);
+        mapMask[cords.y][cords.x] = 0;
+        
+        killCounter += 1;
+        $('.counter').text(killCounter);
         
       };
       
@@ -233,9 +261,6 @@ $(document).ready(function () {
       });
       
     }();
-   
-    fsMsg(data, 5000);
-    
   });
   
   socket.on('event-statistics', function (data) {
@@ -245,14 +270,9 @@ $(document).ready(function () {
     if (data.stat === 1) {
       var cashSound = new Audio("../sounds/cash.wav");
           cashSound.play();
-    }
-    
+    };
     
     myPopup(data.msg);
-  });
-  
-  socket.on('wantYouFight', function(data) {
-    attackOrRun(data);
   });
   
   // SHOW PLAYERS LIST
