@@ -44,14 +44,37 @@ var generateEventMap = function (data, socket) {
     mapMask[i] = tempMap;
     tempMap = [];
   };
+  
+  var radiationRain = function () { 
+    var canvas = document.getElementById('radiationRain');
+    if (canvas.getContext) {
+      var x = [],
+          y = [];
+      for (var i = 0; i < 10000; i += 1) {
+        x.push(Math.floor((Math.random() * 1000 ) % 518));
+        y.push(Math.floor((Math.random() * 1000 ) % 268));
+      };
+      var c = canvas.getContext('2d');
+      c.fillStyle = 'red';
+      var frame = 0;
+      setInterval(function () {
+        c.fillRect(x[frame],y[frame],3,3);
+        frame += 1;
+      }, 10);
+    };
+  };
+  
   $('#gaming').css('background', 'url(../images/grass.jpg)');
   
   // PLAYER PLACE
-  $('#gaming').append('<canvas width="517" height="267" id="eventCanvas"></canvas>')
+  $('#gaming').append('<canvas width="517" height="267" id="eventCanvas"></canvas>' + 
+                      '<canvas style="z-index: 1" width="517" height="267" id="radiationRain"></canvas>"')
               .css('cursor', 'url(../images/cross1.cur), auto');
 
+  radiationRain();
+              
   var playerDiv = '<div class="player" id="player' + playerColumn + "-" + 5 + 
-                  '" tabindex="-1" style="z-index: 1;display: inline-block;width: 40px; height: 40px; position: absolute;' +
+                  '" tabindex="-1" style="z-index: 0;display: inline-block;width: 40px; height: 40px; position: absolute;' +
                   'left: ' + playerColumn * 42 + 'px; top: ' + 5 * 42 + 'px"><img class="playerImg"' + 
                   'src="../images/eventModelR.png" style="position: relative; bottom: 50px"></img></div>';
   $('#gaming').append(playerDiv);
@@ -83,7 +106,7 @@ var generateEventMap = function (data, socket) {
     if ( mapMask[monsterPositions[i][0]][monsterPositions[i][1]] !== -1 ) {
       var snorkType = Math.random() > 0.5 ? '1' : '';
       monstersDiv += '<div id="monstr' + monsterPositions[i][1] + '-' + monsterPositions[i][0] + '" class="monsters"' +
-                     'style="background-repeat:no-repeat;z-index: 0; display: inline-block; width: 40px; height: 40px; ' +
+                     'style="background-repeat:no-repeat;z-index: 1; display: inline-block; width: 40px; height: 40px; ' +
                      'position: absolute; left: ' + monsterPositions[i][1] * 42 + 'px; top: ' + monsterPositions[i][0] * 42 +
                      'px; background-image: url(../images/snork' + snorkType + '.png)"></div>';
       mapMask[monsterPositions[i][0]][monsterPositions[i][1]] = -1;
