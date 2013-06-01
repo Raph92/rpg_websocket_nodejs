@@ -110,11 +110,17 @@ var getStatistics = function (socket, mapLoader) {
 
 var showPlayers = function (data, socket) {
   var players = '<table>';
-  for (var i = 0; i < data.length; i += 1) {
-    if (i % 3 === 0 && i > 0) players += '<tr>';
-    players += '<td><p><img name="att" src="../images/attack_icon.png" class="op-icons" /><span>' + data[i] + 
-               '</span></p></td>';
-    if (i % 3 === 0 && i > 0) players += '</tr>';
+  var counter = 0;
+  for (var x in data) {
+    if (counter % 3 === 0 && counter > 0) {
+      players += '<tr>';
+    };
+    players += '<td><p><img src="../images/faction_' + data[x] + '.png" class="op-icons"></img>' + 
+    '<span>' + x + '</span></p></td>';
+    if (counter % 3 === 0 && counter > 0) {
+      players += '</tr>';
+    };
+    counter += 1;
   };
   players += '</table>';
   $('#players').html(players);

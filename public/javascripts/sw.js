@@ -11,6 +11,7 @@ $(document).ready(function () {
       socket.emit('connectMe', data);
       getStatistics(socket);
       myInterface();
+      runBattleScripts(socket);
     });
   });
   
@@ -24,25 +25,17 @@ $(document).ready(function () {
     };
   });
   
-  socket.on('wantYouFight', function(data) {
-    attackOrRun(data);
+  socket.on('battle', function(data) {
+    fightInfo(data);
   });
   
+  socket.on('map-load', function (data) {
+    generateMap(data.att_x, data.att_y, data.att_faction, data.def_x, data.def_y, data.def_faction);
+  });
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+  socket.on('opponent-in-battle', function (data) {
+    myPopup(data, 0, 200, 300);
+  });
   
   socket.on('server-event', function(data) {
     generateEventMap(data, socket);

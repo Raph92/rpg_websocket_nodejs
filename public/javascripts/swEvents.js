@@ -58,7 +58,7 @@ var generateEventMap = function (data, socket) {
       c.fillStyle = 'red';
       var frame = 0;
       setInterval(function () {
-        c.fillRect(x[frame],y[frame],3,3);
+        c.fillRect(x[frame],y[frame],1,1);
         frame += 1;
       }, 10);
     };
@@ -74,7 +74,7 @@ var generateEventMap = function (data, socket) {
   radiationRain();
               
   var playerDiv = '<div class="player" id="player' + playerColumn + "-" + 5 + 
-                  '" tabindex="-1" style="z-index: 0;display: inline-block;width: 40px; height: 40px; position: absolute;' +
+                  '" tabindex="-1" style="z-index: 2;display: inline-block;width: 40px; height: 40px; position: absolute;' +
                   'left: ' + playerColumn * 42 + 'px; top: ' + 5 * 42 + 'px"><img class="playerImg"' + 
                   'src="../images/eventModelR.png" style="position: relative; bottom: 50px"></img></div>';
   $('#gaming').append(playerDiv);

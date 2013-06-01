@@ -116,8 +116,4 @@ var createEventSchemas = function () {
 
 // createEventSchemas();
 
-
-
-
-
 mongoose.connect('mongodb://localhost/');

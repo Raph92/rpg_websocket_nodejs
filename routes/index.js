@@ -11,7 +11,6 @@ var stalkerToSocket = {},
     socketToStalker = {},
     usersAllowed = {},
     stalkerLocation = {},
-    stalkersInBattle = {},
     actualEvent = {
       players : {},
       time : 0,
@@ -20,7 +19,7 @@ var stalkerToSocket = {},
       penalty : 0,
       penaltyText : ''
     },
-    fightCount = 0;
+    actualBattles = {};
 
 
 //------------------------------//
@@ -28,14 +27,36 @@ var stalkerToSocket = {},
 //------------------------------// 
 
 // PREPARE PLAYERS LIST TO ROOM 
-var playersList = function (room) {
-  var stalkersList = [];  
-  for (var x in stalkerLocation) {
-    if (stalkerLocation[x] === room) {
-      stalkersList.push(socketToStalker[x]);
+var playersList = function (room, callback) {
+  
+var playersCount = 0,
+    counter      = 0,
+    stalkersList = {},
+    showRoom = room;
+      
+for (var x in stalkerLocation) {
+  playersCount += 1;
+};
+
+var setPlayersData = function (nick, faction) {
+  if (nick) {
+    counter += 1;
+    stalkersList[nick] = faction;
+    if (counter === playersCount) {
+      callback(showRoom, stalkersList);
+    };
+  } else {
+    for (var x in stalkerLocation) {
+      if (stalkerLocation[x] === room) {
+        Stalker.findOne({ 'nick' : socketToStalker[x] }, function (err, stalker) {
+          setPlayersData(stalker.nick, stalker.faction);
+        });
+      };
     };
   };
-  return stalkersList;
+};
+setPlayersData();
+
 };
 
 // STYLING DATE FOR MY FORMAT 
@@ -99,13 +120,13 @@ exports.listen = function(server) {
             );
           };
         });
-        io.sockets.socket(actualEvent.players[x]).emit('event-statistics', {'msg': eventType.penaltyText, 'stat' : 0});
+        io.sockets.socket(actualEvent.players[x]).emit('event-statistics', {
+                                                        'msg': eventType.penaltyText, 'stat' : 0});
       };
       
       }, eventTime);
       
     };
-    
     var chooseEvent = function (event_data) {
       if (event_data) {
         var eventData = event_data;
@@ -127,7 +148,6 @@ exports.listen = function(server) {
         });
       };
     };
-      
     chooseEvent();
   };
   // END OF MAKE EVENTS
@@ -162,21 +182,40 @@ exports.listen = function(server) {
           socket.join(stalkerLocation[socket.id]);
         };
         var oldRoom = stalkerLocation[socket.id];
-        socket.broadcast.to(oldRoom).emit('players-list', playersList(oldRoom));
-        
         stalkerLocation[socket.id] = place;
+        
+        playersList(oldRoom, function (showRoom, stalkersList) {
+          socket.broadcast.to(showRoom).emit('players-list', stalkersList);
+        });
         socket.leave(oldRoom);
         socket.join(stalkerLocation[socket.id]);
         
-        socket.broadcast.to(stalkerLocation[socket.id]).emit('players-list', playersList(stalkerLocation[socket.id]));
-        socket.emit('players-list', playersList(stalkerLocation[socket.id]));
+        playersList(stalkerLocation[socket.id], function (showRoom, stalkersList) {
+          socket.broadcast.to(showRoom).emit('players-list', stalkersList);
+        });
+        
+        playersList(stalkerLocation[socket.id], function (showRoom, stalkersList) {
+          socket.emit('players-list', stalkersList);
+        });
+        
       } else {
         Stalker.findOne({ 'nick' : socketToStalker[socket.id]}, function(err,stalkers){
           placeMe(stalkers.place);
         });
       };
     };
-  
+    
+    var mapLoad = function (socket_att, socket_def, arena_options) {
+        io.sockets.socket(socket_att).emit('map-load', arena_options );
+        io.sockets.socket(socket_def).emit('map-load', arena_options );
+    };
+    
+    var mapRefresh = function (socket_att, socket_def) {
+    
+    
+    
+    };
+    
     /* SET OF OPERATIONS TO DO AFTER LOGIN, LINK STALKER(NICK) WITH CURRENT SOCKET ID,
        LOAD LAST VISITED LOCATION(ROOM), AND PRINT INFORMATION ABOUT LAST LOGIN TIME  */
     socket.on('connectMe', function (data) {
@@ -188,9 +227,9 @@ exports.listen = function(server) {
       }).update(
         { $set: { last_login: Date.now() } }
       );
-      // setTimeout( function () {
-        // makeEvent();
-      // }, 5000);
+//       setTimeout( function () {
+//         makeEvent();
+//       }, 5000);
     });
     
     socket.on('rescue', function (data) {
@@ -202,30 +241,76 @@ exports.listen = function(server) {
       delete actualEvent.players[socketToStalker[socket.id]];
     });
 
-    // FIGHTS
-    socket.on('fightWithMe', function (data){
-      // var room = socketToStalker[socket.id] + '/' + data;
-      // stalkersInBattle[socket.id] = room;
+    
+    //------------//
+    //  FIGHTING  //
+    //------------//
+    socket.on('attack', function (data){
       if ( stalkerToSocket[data] !== socket.id) {
-        io.sockets.socket(stalkerToSocket[data]).emit('wantYouFight', { who: socketToStalker[socket.id] } );
+        if (!actualBattles[stalkerToSocket[data]] && !actualBattles[socketToStalker[socket.id]]) {
+          var attacker = {},
+              defender = {};
+        
+          var saveDatas = function (option, stalkerData) {
+            var stalker = {};
+            stalker.name = stalkerData.nick;
+            stalker.faction = stalkerData.faction;
+            stalker.str = stalkerData.str;
+            stalker.acc = stalkerData.acc;
+            stalker.end = stalkerData.end;
+            stalker.att = stalker.str * 1.5;
+            stalker.head = stalker.acc;
+            stalker.life = stalker.end * 20;
+            stalker.x = 0;
+            stalker.y = 0;
+            
+            if (option === 0) {
+              attacker = stalker;
+              attacker.y = Math.floor(Math.random() * 10) % 6;
+              attacker.opponent = stalkerToSocket[data];
+              
+              Stalker.findOne({ 'nick' : data }, function (err, stalker) {
+                saveDatas(1, stalker);
+              });
+            } else {
+              defender = stalker;
+              defender.x = 11;
+              defender.y = Math.floor(Math.random() * 10) % 6;
+              defender.opponent = socket.id;
+              
+              actualBattles[socket.id] = attacker;
+              actualBattles[stalkerToSocket[data]] = defender;
+              
+              var arena_options = {
+                att_x : attacker.x,
+                att_y : attacker.y,
+                att_faction : attacker.faction,
+                def_x : defender.x,
+                def_y : defender.y,
+                def_faction : defender.faction
+              };
+              
+              io.sockets.socket(stalkerToSocket[data]).emit('battle', { 
+                who: socketToStalker[socket.id] } );
+              
+              mapLoad(socket.id, stalkerToSocket[data], arena_options);
+            };
+          };
+          
+          Stalker.findOne({ 'nick' : socketToStalker[socket.id] }, function (err, stalker) {
+            saveDatas(0, stalker);
+          });
+        } else {
+          socket.emit('opponent-in-battle', data + ' aktualnie zmaga się z kim innym, jako ' + 
+                      'honorowy stalker, dajesz mu jeszcze chwilę');
+        }
       };
-      // socket.join(room);
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
     });
     
+    
+    //---------------//
+    //   TRAVELING   //
+    //---------------//
     socket.on('travel', function (data) {
       Stalker.findOne({ 'nick' : socketToStalker[socket.id]}, function(err,stalkers){})
              .update(
@@ -283,7 +368,10 @@ exports.listen = function(server) {
       delete socketToStalker[socket.id];
       var oldRoom = stalkerLocation[socket.id];
       delete stalkerLocation[socket.id];
-      socket.broadcast.to(oldRoom).emit('players-list', playersList(oldRoom));
+      
+      playersList(oldRoom, function (showRoom, stalkersList) {
+        socket.broadcast.to(showRoom).emit('players-list', stalkersList);
+      });
     });
   });
 };
@@ -375,10 +463,12 @@ exports.createChar = function (req, res) {
   };
   var pageHtml = '';
   if (!req.session.account) {
-    pageHtml = '<div id="create-character"><form id="crt-char-form" action="/create-stalker" method="post" accept-charset="utf-8">' + 
+    pageHtml = '<div id="create-character"><form id="crt-char-form" action="/create-stalker" method="post"' +
+    'accept-charset="utf-8">' + 
       '<table>' +
         '<tr><td></td><td></td><td rowspan=7><input type="hidden" name="avatar"/>' + 
-        '<img id="avatar" src="../images/avatar_none.jpg"/><br/><img id="faction" src="../images/avatar_none.jpg"/></td></tr>' +
+        '<img id="avatar" src="../images/avatar_none.jpg"/><br/><img id="faction" ' +
+        'src="../images/avatar_none.jpg"/></td></tr>' +
         '<tr><td><span>Imie: </span></td><td><input type="text" name="nickname" class="text_input"/></td></tr>' +
         '<tr><td><span>Hasło: </span></td><td><input type="password" name="password" class="text_input"/></td></tr>' +
         '<tr><td><span>Frakcja: </span></td><td>' +
@@ -394,7 +484,8 @@ exports.createChar = function (req, res) {
         '<td><span></span><input type="hidden" name="accuracy"/>' +
         '<img name="plus" src="../images/plus.png" class="stats-btn"/>' +
         '<img name="minus" src="../images/minus.png" class="stats-btn"/></td></tr>' +
-        '<tr><td><span>Wytrzymałość: </span><img class="stat-icons" src="../images/end_icon.png"></td><td><span></span><input type="hidden" name="endurance"/>' +
+        '<tr><td><span>Wytrzymałość: </span><img class="stat-icons" ' + 
+        'src="../images/end_icon.png"></td><td><span></span><input type="hidden" name="endurance"/>' +
         '<img name="plus" src="../images/plus.png" class="stats-btn"/>' +
         '<img name="minus" src="../images/minus.png" class="stats-btn"/></td></tr>' +
         '<tr><td><span>Punkty: </span><img class="stat-icons" src="../images/points_icon.png"></td>' +
