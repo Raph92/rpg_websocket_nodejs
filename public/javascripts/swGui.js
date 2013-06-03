@@ -109,19 +109,17 @@ var getStatistics = function (socket, mapLoader) {
 };
 
 var showPlayers = function (data, socket) {
-  var players = '<table>';
-  var counter = 0;
-  for (var x in data) {
-    if (counter % 3 === 0 && counter > 0) {
-      players += '<tr>';
-    };
-    players += '<td><p><img src="../images/faction_' + data[x] + '.png" class="op-icons"></img>' + 
-    '<span>' + x + '</span></p></td>';
-    if (counter % 3 === 0 && counter > 0) {
-      players += '</tr>';
-    };
-    counter += 1;
+  var players = '<table>',
+      count = 0;
+  
+  for (var i in data) {
+    if (count % 3 === 0 && count > 0) players += '<tr>';
+    players += '<td><p><img name="att" src="../images/faction_' + data[i] + '.png" class="op-icons" /><span>' + i + 
+               '</span></p></td>';
+    if (count % 3 === 0 && count > 0) players += '</tr>';
+  
   };
+  
   players += '</table>';
   $('#players').html(players);
   runBattleScripts(socket);

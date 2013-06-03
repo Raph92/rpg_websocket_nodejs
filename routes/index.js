@@ -11,6 +11,7 @@ var stalkerToSocket = {},
     socketToStalker = {},
     usersAllowed = {},
     stalkerLocation = {},
+    stalkerFactions = {},
     actualEvent = {
       players : {},
       time : 0,
@@ -27,36 +28,14 @@ var stalkerToSocket = {},
 //------------------------------// 
 
 // PREPARE PLAYERS LIST TO ROOM 
-var playersList = function (room, callback) {
-  
-var playersCount = 0,
-    counter      = 0,
-    stalkersList = {},
-    showRoom = room;
-      
-for (var x in stalkerLocation) {
-  playersCount += 1;
-};
-
-var setPlayersData = function (nick, faction) {
-  if (nick) {
-    counter += 1;
-    stalkersList[nick] = faction;
-    if (counter === playersCount) {
-      callback(showRoom, stalkersList);
-    };
-  } else {
-    for (var x in stalkerLocation) {
-      if (stalkerLocation[x] === room) {
-        Stalker.findOne({ 'nick' : socketToStalker[x] }, function (err, stalker) {
-          setPlayersData(stalker.nick, stalker.faction);
-        });
-      };
+var playersList = function (room) {
+ var stalkersList = {};  
+  for (var x in stalkerLocation) {
+    if (stalkerLocation[x] === room) {
+      stalkersList[socketToStalker[x]] = stalkerFactions[x];
     };
   };
-};
-setPlayersData();
-
+  return stalkersList;
 };
 
 // STYLING DATE FOR MY FORMAT 
@@ -176,40 +155,32 @@ exports.listen = function(server) {
   io.sockets.on('connection', function (socket) {
     // FUNCTION FOR TRAVELING ON MAP(CHANGING ROOM)
     var placeMe = function (place) {
-      if (place) {
-        if (!stalkerLocation[socket.id]) {
-          stalkerLocation[socket.id] = place;
-          socket.join(stalkerLocation[socket.id]);
-        };
-        var oldRoom = stalkerLocation[socket.id];
+      if (!stalkerLocation[socket.id]) {
         stalkerLocation[socket.id] = place;
-        
-        playersList(oldRoom, function (showRoom, stalkersList) {
-          socket.broadcast.to(showRoom).emit('players-list', stalkersList);
-        });
-        socket.leave(oldRoom);
         socket.join(stalkerLocation[socket.id]);
-        
-        playersList(stalkerLocation[socket.id], function (showRoom, stalkersList) {
-          socket.broadcast.to(showRoom).emit('players-list', stalkersList);
-        });
-        
-        playersList(stalkerLocation[socket.id], function (showRoom, stalkersList) {
-          socket.emit('players-list', stalkersList);
-        });
-        
-      } else {
-        Stalker.findOne({ 'nick' : socketToStalker[socket.id]}, function(err,stalkers){
-          placeMe(stalkers.place);
-        });
       };
+      var oldRoom = stalkerLocation[socket.id];
+      stalkerLocation[socket.id] = place;
+      
+      socket.broadcast.to(oldRoom).emit('players-list', playersList(oldRoom));
+      
+      socket.leave(oldRoom);
+      socket.join(stalkerLocation[socket.id]);
+      
+      socket.broadcast.to(stalkerLocation[socket.id]).emit('players-list', playersList(stalkerLocation[socket.id]));
+      socket.emit('players-list', playersList(stalkerLocation[socket.id]));
     };
     
+    
+    // FUNCTION FOR GENERATE ARENA FOR BATTLE
     var mapLoad = function (socket_att, socket_def, arena_options) {
-        io.sockets.socket(socket_att).emit('map-load', arena_options );
-        io.sockets.socket(socket_def).emit('map-load', arena_options );
+      arena_options.role = 'attacker';
+      io.sockets.socket(socket_att).emit('map-load', arena_options );
+      arena_options.role = 'defender';
+      io.sockets.socket(socket_def).emit('map-load', arena_options );
     };
     
+    // PLAYER POSITION REFRESHER
     var mapRefresh = function (socket_att, socket_def) {
     
     
@@ -219,14 +190,21 @@ exports.listen = function(server) {
     /* SET OF OPERATIONS TO DO AFTER LOGIN, LINK STALKER(NICK) WITH CURRENT SOCKET ID,
        LOAD LAST VISITED LOCATION(ROOM), AND PRINT INFORMATION ABOUT LAST LOGIN TIME  */
     socket.on('connectMe', function (data) {
+      var saveFaction = function (faction) {
+        stalkerFactions[socket.id] = faction;
+      };
       stalkerToSocket[data] = socket.id;
       socketToStalker[socket.id] = data;
-      placeMe();
+     
+            
       Stalker.findOne({ 'nick' : socketToStalker[socket.id]}, function (err, stalker) {
         socket.emit('msg', 'Ostatnio zalogowany: ' + parseDate(stalker.last_login));
+        saveFaction(stalker.faction);
+        placeMe(stalker.place);
       }).update(
         { $set: { last_login: Date.now() } }
       );
+      
 //       setTimeout( function () {
 //         makeEvent();
 //       }, 5000);
@@ -268,6 +246,7 @@ exports.listen = function(server) {
               attacker = stalker;
               attacker.y = Math.floor(Math.random() * 10) % 6;
               attacker.opponent = stalkerToSocket[data];
+              attacker.stat = 'attacker';
               
               Stalker.findOne({ 'nick' : data }, function (err, stalker) {
                 saveDatas(1, stalker);
@@ -277,6 +256,7 @@ exports.listen = function(server) {
               defender.x = 11;
               defender.y = Math.floor(Math.random() * 10) % 6;
               defender.opponent = socket.id;
+              defender.stat = 'defender';
               
               actualBattles[socket.id] = attacker;
               actualBattles[stalkerToSocket[data]] = defender;
@@ -300,11 +280,61 @@ exports.listen = function(server) {
           Stalker.findOne({ 'nick' : socketToStalker[socket.id] }, function (err, stalker) {
             saveDatas(0, stalker);
           });
+          
         } else {
           socket.emit('opponent-in-battle', data + ' aktualnie zmaga się z kim innym, jako ' + 
                       'honorowy stalker, dajesz mu jeszcze chwilę');
         }
       };
+    });
+    
+    
+    socket.on('move', function (data) {
+      var x = actualBattles[socket.id].x,
+          y = actualBattles[socket.id].y;
+    
+      if (data === 'left' ) {
+        if (x > 0) {
+          if (actualBattles[actualBattles[socket.id].opponent].x !== x - 1 || 
+              actualBattles[actualBattles[socket.id].opponent].y !== y) {
+             actualBattles[socket.id].x -= 1;
+          };
+        };
+      } else if (data === 'right') {
+        if (x < 11) {
+           if (actualBattles[actualBattles[socket.id].opponent].x !== x + 1 ||
+               actualBattles[actualBattles[socket.id].opponent].y !== y) {
+             actualBattles[socket.id].x += 1;
+           };
+        };
+      } else if (data === 'up') {
+          if (y > 0) {
+            if (actualBattles[actualBattles[socket.id].opponent].y !== y - 1 ||
+                actualBattles[actualBattles[socket.id].opponent].x !== x) {
+              actualBattles[socket.id].y -= 1;
+            };
+          };
+      } else if (data === 'down') {
+          if(y < 5) {
+            if (actualBattles[actualBattles[socket.id].opponent].y !== y + 1 ||
+                actualBattles[actualBattles[socket.id].opponent].x !== x) {
+              actualBattles[socket.id].y += 1;
+            };
+          };
+      };
+    
+      
+      var playerCords = {
+          'stat' : actualBattles[socket.id].stat,
+          'x' : actualBattles[socket.id].x,
+          'y' : actualBattles[socket.id].y
+      };
+    
+      socket.emit('on-move', playerCords);
+      io.sockets.socket(actualBattles[socket.id].opponent).emit('on-move', playerCords);
+      
+      console.log(playerCords);
+    
     });
     
     
@@ -341,7 +371,7 @@ exports.listen = function(server) {
           };
         } else {
           var upd;
-          if (stalkers.money >= 500) {
+          if (stalkers.money >= 50) {
             if(data === 'energetic') {
               upd = { money: -50, energetic: 1 };
             } else {
@@ -368,10 +398,9 @@ exports.listen = function(server) {
       delete socketToStalker[socket.id];
       var oldRoom = stalkerLocation[socket.id];
       delete stalkerLocation[socket.id];
+      delete stalkerFactions[socket.id];
       
-      playersList(oldRoom, function (showRoom, stalkersList) {
-        socket.broadcast.to(showRoom).emit('players-list', stalkersList);
-      });
+      socket.broadcast.to(oldRoom).emit('players-list', playersList(oldRoom));
     });
   });
 };

@@ -9,6 +9,7 @@ $(document).ready(function () {
     console.info('Nawiązano połączenie');
     $.post("socket-connect", function(data) {
       socket.emit('connectMe', data);
+      createCharScripts();
       getStatistics(socket);
       myInterface();
       runBattleScripts(socket);
@@ -30,7 +31,7 @@ $(document).ready(function () {
   });
   
   socket.on('map-load', function (data) {
-    generateMap(data.att_x, data.att_y, data.att_faction, data.def_x, data.def_y, data.def_faction);
+    generateMap(data, socket);
   });
   
   socket.on('opponent-in-battle', function (data) {
