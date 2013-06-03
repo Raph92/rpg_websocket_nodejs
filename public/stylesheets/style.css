@@ -380,3 +380,11 @@ body {
   font-weight: bold;
   color: red;
 }
+.hp-count {
+  color: red;
+  font-size: 1.2em ;
+}
+.bat-nick {
+  color: yellow;
+  font-size: 1.2em;
+}

@@ -85,14 +85,18 @@ var getStatistics = function (socket, mapLoader) {
                          'src="../images/ak_weapon.png"></img></td></tr><tr><td>' +
                          '<img name="armor" title="Pancerz" class="item" src="../images/armor_' + data.faction + '.png"></img></td>' + 
                          '<td><img name="scope" title="Trafiaj tam gdzie chcesz" class="item"' + 
-                         'src="../images/scope.png"></img><img name="energetic" ' +
+                         'src="../images/scope.png"></img>' + 
+                         '<img name="firstaid" ' +
+                         'title="Pozwala trochę podleczyć rany" class="item"' +
+                         ' src="../images/potion_hp.png" style="margin-top:5px;"></img><img name="energetic" ' +
                          'title="Daje niezłego kopa" class="item"' +
-                         ' src="../images/potion_str.png" style="margin-top:20px;"></img></td><td><img name="vodka" title="Żeby ręce nie latały..." class="item"' + 
+                         ' src="../images/potion_str.png" style="m"></img></td><td><img name="vodka" title="Żeby ręce nie latały..." class="item"' + 
                          'src="../images/potion_acc.png"></img></td></tr></table>' + 
                          '<span style="position: absolute; left: 240px; top: 55px;">' + data.weapon + '</span>' + 
                          '<span style="position: absolute; left: 80px; top: 205px;">' + data.armor + '</span>' + 
-                         '<span style="position: absolute; left: 190px; top: 125px;">' + data.scope + '</span>' + 
-                         '<span style="position: absolute; left: 172px; top: 192px;">' + data.energetic + '</span>' +
+                         '<span style="position: absolute; left: 190px; top: 105px;">' + data.scope + '</span>' + 
+                         '<span style="position: absolute; left: 180px; top: 145px;">' + data.firstaid + '</span>' + 
+                         '<span style="position: absolute; left: 172px; top: 206px;">' + data.energetic + '</span>' +
                          '<span style="position: absolute; left: 208px; top: 185px;">' + data.vodka + '</span>')
                   .tooltip({
                     track: true

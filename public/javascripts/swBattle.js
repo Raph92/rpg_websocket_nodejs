@@ -23,7 +23,8 @@ var idUnparse = function (div) {
 
 var generateMap = function (data, socket) {
   var role = data.role;
-
+  $('#map div').unbind('click'); 
+  
   $('#gaming').empty();
   $('#gaming').css('background', 'url(../images/arena.jpg)');
 
@@ -31,33 +32,89 @@ var generateMap = function (data, socket) {
               .css('cursor', 'url(../images/aim_red.cur), auto');
               
   var htmlGaming = '';
-  for (var i = 0; i < 6; i += 1) {
+  for (var i = 0; i < 5; i += 1) {
    for (var j = 0; j < 12; j += 1) {
       htmlGaming += '<div id="place' + j + '-' + i + 
-      '" class="battleDivs" style=" width: 40px; height: 40px;' +
-      'position: absolute; top: ' + (i * 42) + 'px; left: ' + (j * 42) + 'px;">';
+      '" class="battleDivs" style="border: 1px solid black; width: 41px; height: 41px;' +
+      'position: absolute; top: ' + (i * 43) + 'px; left: ' + (j * 43) + 'px;">';
       
       if (i === data.att_y && j === data.att_x) {
         htmlGaming += '<img tabindex="-1" id="attacker" src="../images/' + data.att_faction + 
-        '_model.png" style="position:relative; bottom: 65px"></img>';
+        '_model.png" style="position:relative; bottom: 65px" class="models"></img>';
       }
       if (i === data.def_y && j === data.def_x) {
         htmlGaming += '<img tabindex="-1" id="defender" src="../images/' + data.def_faction + 
-        '_model.png" style="position:relative; bottom: 65px"></img>';
+        '_model.png" style="position:relative; bottom: 65px" class="models"></img>';
       }
   
       htmlGaming += '</div>';
    };
   };
   
+  $('#gaming').append(htmlGaming);
+
+  $('#gaming').append('<span id="a-hp" class="hp-count" style="position: absolute; bottom: 0px; left: 0px"></span>' + 
+                      '<span id="d-hp" class="hp-count" style="position: absolute; bottom: 0px; right: 0px"></span>');
   
-  $('#gaming').append(htmlGaming).focus();
+  $('#gaming').append('<span id="a-nick" class="bat-nick" style="position: absolute; bottom: 20px; left: 0px"></span>' + 
+                      '<span id="d-nick" class="bat-nick" style="' + 
+                      'position: absolute; bottom: 20px; right: 0px"></span>');
+  
+  $('#a-hp').text(data.att_life + 'HP').css('margin-left', '5px');
+  $('#d-hp').text(data.def_life + 'HP').css('margin-right', '5px');
+  
+  $('#a-nick').text(data.att_nick).css('margin-left', '5px');
+  $('#d-nick').text(data.def_nick).css('margin-right', '5px');
+  
+  
+  $('#gaming').append('<img name="str" title="+10 Siła"id="str-pot" ' + 
+                      'src="../images/str_potion_skill.png" style="position: absolute;' + 
+                      'bottom: 0px; left: 35%"></img>' + 
+                      '<img name="acc" title="+10 Celność"id="acc-pot" ' +
+                      'src="../images/acc_potion_skill.png" style="position: absolute;' + 
+                      'bottom: 0px; left: 45%"></img>' +
+                      '<img name="hp" title="+50 Życia"id="hp-pot" ' + 
+                      'src="../images/hp_potion_skill.png" style="position: absolute;' + 
+                      'bottom: 0px; left: 55%"></img>');
+  
+  $('#gaming img').tooltip({
+    track: true
+  });
+  
+  if ($('#inventory span:eq(3)').text() !== '0') {
+    $('#hp-pot').click( function () {
+      socket.emit('potion', $(this).attr('name')); 
+      $('#hp-pot').css('opacity', '0.5').unbind('click');
+    });
+  } else {
+    $('#hp-pot').css('opacity', '0.5');
+  };
+  
+  if ($('#inventory span:eq(4)').text() !== '0') {
+    $('#str-pot').click( function () {
+      socket.emit('potion', $(this).attr('name')); 
+      $('#str-pot').css('opacity', '0.5').unbind('click');
+    });
+  } else {
+    $('#str-pot').css('opacity', '0.5');
+  };
+  
+  if ($('#inventory span:eq(5)').text() !== '0') {
+    $('#acc-pot').click( function () {
+      socket.emit('potion', $(this).attr('name')); 
+      $('#acc-pot').css('opacity', '0.5').unbind('click');
+    });
+  } else {
+    $('#acc-pot').css('opacity', '0.5');
+  };
+  
+  
   
   
   if (role === 'attacker') {
-    $('#attacker').css('border', '1px solid blue').focus();
+    $('#attacker').focus();
   } else {
-    $('#defender').css('border', '1px solid green').focus();
+    $('#defender').focus();
   };
   
   var playerWalking = function (e) {
@@ -67,7 +124,7 @@ var generateMap = function (data, socket) {
       $('#gaming').keydown( function (e) {
         playerWalking(e);
       });
-    }, 100);
+    }, 600);
     
     switch(e.which) {
       case 37: { // LEFT
@@ -113,11 +170,56 @@ var generateMap = function (data, socket) {
       + model + '" style="position:relative; bottom: 65px"></img>');
       $('#defender').focus();
     };
-    
-    console.log(data);
   
   });
-
-
-
+  
+  var playerShooting = function (place) {
+    var gunSound = new Audio("../sounds/ak.wav");
+    gunSound.play();
+    
+    // UNBIND EVENT
+    $('.battleDivs').unbind('click');
+    $('#gaming').css('cursor', 'crosshair');
+    
+    // BIND EVENT AGAIN AFTER (PREVENT SPAM SHOOTING)
+    setTimeout( function () {
+      $('#gaming').css('cursor', 'url(../images/aim_red.cur), auto');
+      $('.battleDivs').click( function () {
+        playerShooting($(this));
+      });
+    }, 750);
+    
+    // ACTIONS OF SINGLE EVENT
+    
+    
+    
+    place.append('<img id="last-bloody" src="../images/blood.png"></img>');
+    
+    setTimeout(function () {
+      $('#last-bloody').remove();
+    
+    },500);
+    
+    
+    // place.css('background-image', 'url(../images/blood.png)'); // SMASH MONSTER!
+    
+    var cords = idUnparse(place);
+    
+    socket.emit('shooting', cords);
+    
+    
+    console.log(cords);
+    
+    $('.models').focus();
+    
+  };
+  
+  $('.battleDivs').click(function () {
+    playerShooting($(this));
+  });
+  
+  
+  
+  
+  
 };

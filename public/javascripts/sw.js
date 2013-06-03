@@ -34,6 +34,17 @@ $(document).ready(function () {
     generateMap(data, socket);
   });
   
+  socket.on('fight-result', function (data) {
+    if (data.stat === 1) {
+      var cashSound = new Audio("../sounds/cash.wav");
+          cashSound.play();
+    };
+    $('#gaming').empty();
+    getStatistics(socket);
+    myPopup(data.msg, 0, 200, 300);
+  
+  });
+  
   socket.on('opponent-in-battle', function (data) {
     myPopup(data, 0, 200, 300);
   });
