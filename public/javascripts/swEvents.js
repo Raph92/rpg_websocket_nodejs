@@ -27,6 +27,8 @@ var generateEventMap = function (data, socket) {
   };
   fsMsg(data.name, 5000);
   
+  $('#map div').unbind('click'); 
+  
   var playerColumn = giveRand(),
       bunkerColumn = giveRand(),
       monsterPositions = [],

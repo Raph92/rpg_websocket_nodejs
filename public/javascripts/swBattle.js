@@ -1,3 +1,4 @@
+'use strict';
 var runBattleScripts = function (socket) {
   $('.op-icons').click(function (){
     var opponent = $(this).next().text();
@@ -23,6 +24,8 @@ var idUnparse = function (div) {
 
 var generateMap = function (data, socket) {
   var role = data.role;
+  var battleSound = new Audio("../sounds/load.wav");
+      battleSound.play();
   $('#map div').unbind('click'); 
   
   $('#gaming').empty();
@@ -83,6 +86,8 @@ var generateMap = function (data, socket) {
   
   if ($('#inventory span:eq(3)').text() !== '0') {
     $('#hp-pot').click( function () {
+      var itemSound = new Audio("../sounds/potion.wav");
+      itemSound.play();
       socket.emit('potion', $(this).attr('name')); 
       $('#hp-pot').css('opacity', '0.5').unbind('click');
     });
@@ -92,6 +97,8 @@ var generateMap = function (data, socket) {
   
   if ($('#inventory span:eq(4)').text() !== '0') {
     $('#str-pot').click( function () {
+      var itemSound = new Audio("../sounds/potion.wav");
+      itemSound.play();
       socket.emit('potion', $(this).attr('name')); 
       $('#str-pot').css('opacity', '0.5').unbind('click');
     });
@@ -101,6 +108,8 @@ var generateMap = function (data, socket) {
   
   if ($('#inventory span:eq(5)').text() !== '0') {
     $('#acc-pot').click( function () {
+      var itemSound = new Audio("../sounds/potion.wav");
+      itemSound.play();
       socket.emit('potion', $(this).attr('name')); 
       $('#acc-pot').css('opacity', '0.5').unbind('click');
     });
@@ -192,34 +201,28 @@ var generateMap = function (data, socket) {
     // ACTIONS OF SINGLE EVENT
     
     
-    
-    place.append('<img id="last-bloody" src="../images/blood.png"></img>');
-    
-    setTimeout(function () {
-      $('#last-bloody').remove();
-    
-    },500);
-    
-    
-    // place.css('background-image', 'url(../images/blood.png)'); // SMASH MONSTER!
-    
     var cords = idUnparse(place);
     
     socket.emit('shooting', cords);
-    
-    
-    console.log(cords);
     
     $('.models').focus();
     
   };
   
+  socket.on('potion-result', function (data) {
+    if (data.who === 'attacker') {
+      $('.hp-count:eq(0)').text(data.life + 'HP');
+    } else {
+      $('.hp-count:eq(1)').text(data.life + 'HP');
+    };
+  });
+  
   $('.battleDivs').click(function () {
     playerShooting($(this));
   });
   
-  
-  
-  
+  setInterval(function () {
+    $('.models').focus();
+  },100);
   
 };

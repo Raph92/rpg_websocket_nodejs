@@ -62,7 +62,7 @@ exports.listen = function(server) {
   // EVENTS START
   // setInterval( function () { 
     // makeEvent();
-  // }, 600000);
+  // }, 10000);
   
   var makeEvent = function () {
     var availableEvents = ['radiation'],
@@ -74,12 +74,13 @@ exports.listen = function(server) {
       for (var x in socketToStalker) {
         count += 1;
         if ( Math.random() > 0.5 ) {
-          actualEvent.players[socketToStalker[x]] = x;
-        } else {
-          actualEvent.players[socketToStalker[x]] = x;
-        }
+          if (!actualBattles[x]) { 
+            actualEvent.players[socketToStalker[x]] = x;
+          };
+        } 
       };
       for (var x in actualEvent.players) {
+        console.log(actualEvent.players);
         io.sockets.socket(actualEvent.players[x]).emit('server-event', {'name' : eventType.name, 
                                                                         'time' : eventTime});
       };
@@ -184,7 +185,7 @@ exports.listen = function(server) {
         { $inc: { money: 200 , level: 1}}, function () {
         
           Stalker.findOne({'nick': socketToStalker[winner_socket]}, function (err,stalker) {
-            if (stalker.level % 10 === 0) {
+            if (stalker.level % 2 === 0) {
               Stalker.update({'nick' : socketToStalker[winner_socket]}, 
               { $inc: { points: 1 }}, function (){});
             };
@@ -254,9 +255,10 @@ exports.listen = function(server) {
           { $set: { last_login: Date.now() } }
         );
       };      
-      // setTimeout( function () {
-        // makeEvent();
-      // }, 5000);
+      setTimeout( function () {
+        makeEvent();
+        console.log(actualEvent);
+      }, 5000);
     });
     
     socket.on('rescue', function (data) {
@@ -280,7 +282,8 @@ exports.listen = function(server) {
         io.sockets.socket(socket_def).emit('map-load', arena_options );
       };
       if ( stalkerToSocket[data] !== socket.id) {
-        if (!actualBattles[stalkerToSocket[data]] && !actualBattles[socketToStalker[socket.id]]) {
+        if (!actualBattles[stalkerToSocket[data]] && !actualBattles[socketToStalker[socket.id]] &&
+            !actualEvent.players[data] && !actualEvent.players[socketToStalker[socket.id]]) {
           var attacker = {},
               defender = {};
         
@@ -341,7 +344,7 @@ exports.listen = function(server) {
           });
           
         } else {
-          socket.emit('opponent-in-battle', data + ' aktualnie zmaga się na arenie z kim innym'); 
+          socket.emit('opponent-in-battle', data + ' aktualnie zmaga się na arenie z kim innym, lub jest zajęty'); 
         };
       };
     });
@@ -420,18 +423,57 @@ exports.listen = function(server) {
         if (actualBattles[socket.id].life >= actualBattles[socket.id].end * 20) {
           actualBattles[socket.id].life = actualBattles[socket.id].end * 20;
         };
-        console.log(actualBattles[socket.id].life);
         Stalker.findOne({ 'nick' : socketToStalker[socket.id]}, function(err,stalkers){})
                .update(
                  { $inc: { firstaid : -1 } }
                );
+               
+        socket.emit('potion-result', {'who' : actualBattles[socket.id].stat, 
+                                      'life' : actualBattles[socket.id].life});
+        io.sockets.socket(actualBattles[socket.id].opponent).emit('potion-result', {
+                                                               'who' : actualBattles[socket.id].stat, 
+                                                               'life' : actualBattles[socket.id].life});       
       };
     });
     
     
-    
+    // NEED TO ADD TAKING DAMAGE AND SEND STATS OF SHOOT
     socket.on('shooting', function (data) {
-      console.log(data);
+      var calculateDmg = function (dmg, crit) {
+        var dmg_dispersion = 1 - (Math.floor((Math.random() * 100) % 41 - 20) / 100).toPrecision(2),
+            crit_chance = Math.floor(Math.random() * 1000) % 101;
+        
+        dmg = dmg * dmg_dispersion;
+        if (crit_chance < crit) {
+          dmg = dmg * 2;
+        };
+        return dmg.toPrecision(3);
+      };
+      var opponent_socket = actualBattles[socket.id].opponent,
+          shoot_dmg = calculateDmg(actualBattles[socket.id].att, actualBattles[socket.id].head);
+      
+      if (actualBattles[opponent_socket].x === data.x && actualBattles[opponent_socket].y === data.y) {
+        actualBattles[opponent_socket].life = Math.floor(actualBattles[opponent_socket].life - shoot_dmg);
+        
+        var shooting_stats = {};
+        if (actualBattles[socket.id].stat === 'attacker') {
+          shooting_stats['attacker'] = actualBattles[socket.id].life;
+          shooting_stats['defender'] = actualBattles[opponent_socket].life;
+          shooting_stats['who'] = 'defender';
+        } else {
+          shooting_stats['defender'] = actualBattles[socket.id].life;
+          shooting_stats['attacker'] = actualBattles[opponent_socket].life;
+          shooting_stats['who'] = 'attacker';
+        };
+        
+        socket.emit('shooting-result', shooting_stats);
+        io.sockets.socket(opponent_socket).emit('shooting-result', shooting_stats);
+        
+        
+        if (actualBattles[opponent_socket].life <= 0) {
+          fightStatus(socket.id);
+        }; 
+      };
     
     
     });    
@@ -446,6 +488,29 @@ exports.listen = function(server) {
              );
       placeMe(data.where);
     });
+    
+    socket.on('level-up', function (data) {
+      Stalker.findOne({'nick' : socketToStalker[socket.id]}, function (err, stalkers) {
+         if (stalkers.points > 0) {
+           var upd = {};
+           if (data === 'str') {
+            upd = {points: -1, str: 1};
+           } else if (data === 'acc') {
+            upd = {points: -1, acc: 1};
+           } else {
+            upd = {points: -1, end: 1, life: 20};
+           };
+           
+           Stalker.update({'nick' : socketToStalker[socket.id]}, 
+                { $inc:  upd }, function (){
+                  socket.emit('level-up-result', 1);
+                });
+         } else {
+           socket.emit('level-up-result', 0);
+         };
+      });    
+    });
+    
     
     socket.on('shooping', function (data) {
       Stalker.findOne({ 'nick' : socketToStalker[socket.id]}, function(err,stalkers){
@@ -522,7 +587,7 @@ exports.index = function(req, res){
   var pageHtml = '',
       statistics = '';
   if (!req.session.account) {
-    pageHtml = '<div id="index"><p class="bold-center">Witam w grze</p>' +
+    pageHtml = '<div id="index"><p class="bold-center">Stalker Wars</p>' +
                 '<form action="/login" method="post" accept-charset="utf-8">' + 
                   '<table>' +
                   '<tr><td><span>Login: </span></td><td><input class="text_input" type="text" name="login"/></td></tr>' +
@@ -695,6 +760,7 @@ exports.statistics = function (req, res) {
           faction : stalkers.faction,
           nick    : stalkers.nick,
           level   : stalkers.level,
+          points  : stalkers.points,
           dmg     : parseInt(stalkers.str, 10) * 1.5,
           head    : parseInt(stalkers.acc, 10),
           life    : stalkers.life,

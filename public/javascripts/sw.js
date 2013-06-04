@@ -26,6 +26,18 @@ $(document).ready(function () {
     };
   });
   
+  socket.on('level-up-result', function (data) {
+    if (data === 1) {
+      getStatistics(socket, false);
+      var lvlSound = new Audio("../sounds/lvl.wav");
+      lvlSound.play();
+    } else {
+      myPopup('Nie masz wolnych punktów umiejętności', 0, 120, 200);
+    };
+  
+  });
+  
+  
   socket.on('battle', function(data) {
     fightInfo(data);
   });
@@ -39,10 +51,28 @@ $(document).ready(function () {
       var cashSound = new Audio("../sounds/cash.wav");
           cashSound.play();
     };
+    $('#gaming').unbind('keydown');
+    $('.battleDivs').unbind('click');
     $('#gaming').empty();
     getStatistics(socket);
     myPopup(data.msg, 0, 200, 300);
   
+  });
+  
+  socket.on('shooting-result', function (data) {
+    $('.hp-count:eq(0)').text(data.attacker + 'HP');
+    $('.hp-count:eq(1)').text(data.defender + 'HP');
+    
+    $('#' + data.who).parent().append('<img style="position:relative; bottom: 140px;"' + 
+                                      'id="last-bloody" src="../images/blood.png"></img>');
+    
+    var painSound = new Audio("../sounds/pain.wav");
+    painSound.play();
+    
+    setTimeout(function () {
+      $('#last-bloody').remove();
+    
+    },500);
   });
   
   socket.on('opponent-in-battle', function (data) {

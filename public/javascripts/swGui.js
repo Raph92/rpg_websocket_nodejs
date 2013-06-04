@@ -72,25 +72,30 @@ var getStatistics = function (socket, mapLoader) {
                           data.avatar + '"/><br/><img class="avatars" src="../images/faction_' + 
                           data.faction + '.png"/></td></tr><tr><td>Imię</td><td>' + 
                           data.nick + '</td></tr><tr><td>Poziom</td><td>' + 
-                          data.level + '</td></tr><tr><td>Dmg: </td><td>' + 
-                          parseInt(data.str, 10) * 1.5 + '</td></tr><tr><td>Headshoot: </td><td>' + 
+                          data.level + '</td></tr><tr><td>Obrażenia: </td><td>' + 
+                          parseInt(data.str, 10) * 1.5 + '</td></tr><tr><td>Krytyczne: </td><td>' + 
                           parseInt(data.acc, 10) + '%</td></tr><tr><td>Życie: </td><td>' + 
                           data.life + 
-                          ' HP</td></tr><tr><td colspan=2><img class="stat-icons" src="../images/str_icon.png"/>' + data.str + '<img class="stat-icons" src="../images/acc_icon.png"/>' + 
-                          data.acc + '<img class="stat-icons" src="../images/end_icon.png"/>' + 
+                          ' HP</td></tr><tr><td>Punkty: </td><td>' + data.points + '</td></tr><tr><td colspan=2>' + 
+                          '<img name="str"class="stat-icons" src="../images/str_icon.png"/>' + data.str + 
+                          '<img name="acc" class="stat-icons" src="../images/acc_icon.png"/>' + 
+                          data.acc + '<img name="end" class="stat-icons" src="../images/end_icon.png"/>' + 
                           data.end + '</td></tr>' + '<tr><td colspan=2><img class="stat-icons"' +
                           'src="../images/money.png"/>' + data.money + ' RU</td></tr></table>' +
                           '<span style="visibility: hidden">' + data.place + '</span>');
+    
     $('#inventory').html('<table><tr><td colspan="3"><img name="weapon" title="Karabin" class="item" ' +
                          'src="../images/ak_weapon.png"></img></td></tr><tr><td>' +
-                         '<img name="armor" title="Pancerz" class="item" src="../images/armor_' + data.faction + '.png"></img></td>' + 
-                         '<td><img name="scope" title="Trafiaj tam gdzie chcesz" class="item"' + 
+                         '<img name="armor" title="Pancerz" class="item" src="../images/armor_' + 
+                         data.faction + '.png"></img></td>' + 
+                         '<td><img name="scope" title="Luneta" class="item"' + 
                          'src="../images/scope.png"></img>' + 
                          '<img name="firstaid" ' +
-                         'title="Pozwala trochę podleczyć rany" class="item"' +
+                         'title="Apteczka" class="item"' +
                          ' src="../images/potion_hp.png" style="margin-top:5px;"></img><img name="energetic" ' +
-                         'title="Daje niezłego kopa" class="item"' +
-                         ' src="../images/potion_str.png" style="m"></img></td><td><img name="vodka" title="Żeby ręce nie latały..." class="item"' + 
+                         'title="Energetyk" class="item"' +
+                         ' src="../images/potion_str.png" style="m"></img></td>' + 
+                         '<td><img name="vodka" title="Wódka" class="item"' + 
                          'src="../images/potion_acc.png"></img></td></tr></table>' + 
                          '<span style="position: absolute; left: 240px; top: 55px;">' + data.weapon + '</span>' + 
                          '<span style="position: absolute; left: 80px; top: 205px;">' + data.armor + '</span>' + 
@@ -109,6 +114,10 @@ var getStatistics = function (socket, mapLoader) {
     if(mapLoader === undefined) {
       loadMap(socket);
     };
+    $('#statistics img').click(function () {
+      socket.emit('level-up', $(this).attr('name'));
+    });
+  
   });
 };
 
