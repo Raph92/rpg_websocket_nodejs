@@ -197,13 +197,13 @@ var loadMap = function (socket) {
         });
     }, 3000);
     $('#can').fadeIn(0);
-    var cords = divCenters($('div.actual-place')); // Cords of previous div
+    var cords = divCenters($('div.actual-place')); // CORDS OF PREVIOUS DIV
     $('div.actual-place').fadeOut(0).removeClass('actual-place').fadeIn(0);
     $(this).fadeOut(0).addClass('actual-place').fadeIn(1000);
-    drawLines(cords.concat(divCenters($('div.actual-place'))), 'can'); // Draw lines beetwen old and new div
+    drawLines(cords.concat(divCenters($('div.actual-place'))), 'can'); // DRAW LINES BEETWEN OLD AND NEW DIV
     $('#can').fadeOut(2000);
     $('#gaming').fadeOut(0).css('background-image', 'url(../images/' + $('div.actual-place').attr('name') + '.jpg)').fadeIn(0);
-    socket.emit('travel', { where: $('div.actual-place').attr('name') });
+    socket.emit('travel', { where: $('div.actual-place').attr('name') }); // EMIT WITH LOCATION TO TRAVEL
   };
   $('#map div').click(travel)
     .tooltip({

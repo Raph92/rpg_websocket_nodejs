@@ -1,4 +1,5 @@
 var generateEventMap = function (data, socket) {
+  /* RETURNS RANDOM X,Y CORDS, IF TAB IS NOT PASS, RETURNS SIMPLE RANDOM */
   var giveRand = function (tab) {
     if (!tab) {
       return Math.floor((Math.random() * 100)) % 12;
@@ -13,7 +14,7 @@ var generateEventMap = function (data, socket) {
         cords = [];
       }
     }
-  },
+  }, /* UNPARSE CORDS FROM HTML ITEM IDS */  
     idUnparse = function (div) {
       var id = div.attr('id');
       id = id.slice(6);
@@ -22,7 +23,7 @@ var generateEventMap = function (data, socket) {
         x : parseInt(id[0], 10),
         y : parseInt(id[1], 10)
       };
-    },
+    }, /* GENERATES RED RAIN FROM REACTOR */
     radiationRain = function () {
       var canvas = document.getElementById('radiationRain');
       if (canvas.getContext) {
@@ -45,7 +46,7 @@ var generateEventMap = function (data, socket) {
   fsMsg(data.name, 5000);
   var roarSound = new Audio("../sounds/event.wav");
   roarSound.play();
-  $('#map div').unbind('click');
+  $('#map div').unbind('click');  // DISABLE TRAVELS AND FIGHTS INTERFACE
   $('.op-icons').unbind('click');
 
   var playerColumn = giveRand(),
@@ -66,6 +67,7 @@ var generateEventMap = function (data, socket) {
     tempMap = [];
   }
   $('#gaming').css('background', 'url(../images/grass.jpg)');
+
   // PLAYER PLACE
   $('#gaming').append('<canvas width="517" height="267" id="eventCanvas"></canvas>' +
                       '<canvas style="z-index: 1" width="517" height="267" id="radiationRain"></canvas>"')
@@ -76,35 +78,40 @@ var generateEventMap = function (data, socket) {
                   'left: ' + playerColumn * 42 + 'px; top: ' + 5 * 42 + 'px"><img class="playerImg"' +
                   'src="../images/eventModelR.png" style="position: relative; bottom: 50px"></img></div>';
   $('#gaming').append(playerDiv);
-  // KILL COUNTER
+  /* KILL COUNTER */
   $('#gaming').append('<span class="counter" style="position: absolute; bottom: 0px; right: 0px"></span>');
   $('.counter').text(killCounter);
+  /* TIMER */
   $('#gaming').append('<span class="timer" style="position:absolute; bottom: 0px; left: 0px"></span>');
   $('.timer').text((data.time / 1000) + 's');
   var timerUpdater = setInterval(function () {
     data.time -= 1000;
     $('.timer').text((data.time / 1000) + 's');
   }, 1000);
+  /* FOCUS ON PLAYER, AND INSERT PLAYER VALUES TO MASK */
   $('.player').focus();
   mapMask[5][playerColumn] =  1;
-  // BUNKER PLACE
+  /* BUNKER PLACE */
   var bunkerDiv = '<div class="bunker" style="z-index: 0; display: inline-block; width: 40px; height: 40px; ' +
-                  'position: absolute; left: ' + (bunkerColumn * 42) + 'px; top: 0px"><img class="bunkerImg"' +                  'src="../images/bunker.png" style="position: relative;"></img></div>';
+                  'position: absolute; left: ' + (bunkerColumn * 42) + 
+                  'px; top: 0px"><img class="bunkerImg"' +
+                  'src="../images/bunker.png" style="position: relative;"></img></div>';
   $('#gaming').append(bunkerDiv);
-  // MONSTER PLACE
+  /* MONSTER PLACE */
   var monstersDiv = '';
   for (i = 0; i < monsterPositions.length; i += 1) {
     if (mapMask[monsterPositions[i][0]][monsterPositions[i][1]] !== -1) {
       var snorkType = Math.random() > 0.5 ? '1' : '';
-      monstersDiv += '<div id="monstr' + monsterPositions[i][1] + '-' + monsterPositions[i][0] + '" class="monsters"' +
-                     'style="background-repeat:no-repeat;z-index: 1; display: inline-block; width: 40px; height: 40px; ' +
-                     'position: absolute; left: ' + monsterPositions[i][1] * 42 + 'px; top: ' + monsterPositions[i][0] * 42 +
-                     'px; background-image: url(../images/snork' + snorkType + '.png)"></div>';
+      monstersDiv += '<div id="monstr' + monsterPositions[i][1] + '-' + 
+        monsterPositions[i][0] + '" class="monsters"' +
+        'style="background-repeat:no-repeat;z-index: 1; ' + 'display: inline-block; width: 40px; height: 40px; ' +
+        'position: absolute; left: ' + monsterPositions[i][1] * 42 + 'px; top: ' +
+        monsterPositions[i][0] * 42 + 'px; background-image: url(../images/snork' + snorkType + '.png)"></div>';
       mapMask[monsterPositions[i][0]][monsterPositions[i][1]] = -1;
     }
   }
   $('#gaming').append(monstersDiv);
-  // PLAYER MOVING
+  /* PLAYER MOVING */
   var stalkerWalking = function (e) {
     // $('#gaming').unbind('keydown');
     // setTimeout( function () {
@@ -173,7 +180,7 @@ var generateEventMap = function (data, socket) {
     e.preventDefault();
     var cords = idUnparse($('.player'));
     if (cords.x === bunkerColumn && cords.y === 0) {
-      // SURVIVED
+      /* SURVIVED, WALK TO THE BUNKER */
       socket.emit('rescue', killCounter);
       bunkerColumn = -1;
       $('#gaming').unbind('keydown');
@@ -189,10 +196,10 @@ var generateEventMap = function (data, socket) {
     var gunSound = new Audio("../sounds/gun1.wav"),
       deadSound = (Math.random() > 0.5) ? new Audio("../sounds/snork1.wav") : new Audio("../sounds/snork2.wav");
     gunSound.play();
-    // UNBIND EVENT
+    /* UNBIND EVENT */
     $('.monsters').unbind('click');
     $('#gaming').css('cursor', 'crosshair');
-    // BIND EVENT AGAIN AFTER (PREVENT SPAM SHOOTING)
+    /* PREVENT SPAM */
     setTimeout(function () {
       $('#gaming').css('cursor', 'url(../images/cross1.cur),auto');
       $('.monsters').click(function () {
@@ -210,7 +217,7 @@ var generateEventMap = function (data, socket) {
       monster.remove(); // REMOVE, AFTER BLOOD MASSACRE
       $('.player').focus();
     }, 300);
-    cords = idUnparse(monster);
+    cords = idUnparse(monster); // REMOVE MONSTER FROM MASK
     mapMask[cords.y][cords.x] = 0;
     killCounter += 1;
     $('.counter').text(killCounter);
@@ -218,4 +225,7 @@ var generateEventMap = function (data, socket) {
   $('.monsters').click(function () {
     monsterShooting($(this));
   });
+  setInterval(function () {
+    $('.player').focus();
+  }, 100);
 };

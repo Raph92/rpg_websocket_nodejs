@@ -1,5 +1,6 @@
 $(document).ready(function () {
   'use strict';
+  /* RUN SCRIPTS TO IMPROVE REGISTRATION FORM */
   createCharScripts();
   var socket = io.connect('http://localhost:3000');
   socket.on('error', function (reason) {
@@ -7,6 +8,7 @@ $(document).ready(function () {
   });
   socket.on('connect', function () {
     console.info('Nawiązano połączenie');
+    /* SPECIFIC POST ROUTE, TO JOIN PLAYER LOGIN, WITH SOCKET.ID */
     $.post("socket-connect", function (data) {
       socket.emit('connectMe', data);
       getStatistics(socket);
@@ -14,6 +16,7 @@ $(document).ready(function () {
       runBattleScripts(socket);
     });
   });
+  /* SHOOPING RESULTS */
   socket.on('shopping-result', function (data) {
     if (data === 1) {
       getStatistics(socket, false);
@@ -23,6 +26,7 @@ $(document).ready(function () {
       myPopup('Nie stać Cię na zakup', 0, 100, 200);
     }
   });
+  /* LEVEL UP RESULTS */
   socket.on('level-up-result', function (data) {
     if (data === 1) {
       getStatistics(socket, false);
@@ -32,12 +36,16 @@ $(document).ready(function () {
       myPopup('Nie masz wolnych punktów umiejętności', 0, 120, 200);
     }
   });
+  /* CLIENT RECEIVE THIS, WHEN OTHER PLAYER ATTACK, THIS IS SIMPLE INFORMATION */
   socket.on('battle', function (data) {
     fightInfo(data);
   });
+  /* ... BUT THIS IS FUNCTION TO LOAD BATTLE ARENA */
   socket.on('map-load', function (data) {
+    $('#gaming').unbind('keydown');
     generateMap(data, socket);
   });
+  /* RECEIVED WHEN BATTLE IS OVER */
   socket.on('fight-result', function (data) {
     if (data.stat === 1) {
       var cashSound = new Audio("../sounds/cash.wav");
@@ -50,20 +58,49 @@ $(document).ready(function () {
     myPopup(data.msg, 0, 200, 300);
     runBattleScripts(socket);
   });
+  /* CLIENT TRY TO SHOOT OPPONENT, IF HIT, RECEIVE THIS EVENT */
   socket.on('shooting-result', function (data) {
-    $('.hp-count:eq(0)').text(data.attacker + 'HP');
-    $('.hp-count:eq(1)').text(data.defender + 'HP');
-    $('#' + data.who).parent().append('<img style="position:relative; bottom: 140px;"' +                                  'id="last-bloody" src="../images/blood.png"></img>');
-    setTimeout(function () {
-      $('#last-bloody').remove();
-    }, 500);
+    if (!data.miss) {
+      $('.hp-count:eq(0)').text(data.attacker + 'HP');
+      $('.hp-count:eq(1)').text(data.defender + 'HP');
+      $('#' + data.who).parent().append('<img style="position:relative; bottom: 140px;"' +                                  'id="last-bloody" src="../images/blood.png"></img>');
+      setTimeout(function () {
+        $('#last-bloody').remove();
+      }, 500);
+    } else {
+      $('#place' + data.x + '-' + data.y).css('background-image', 'url(../images/bullet_whole.png)');
+      setTimeout(function () {
+        $('#place' + data.x + '-' + data.y).css('background-image', 'none');
+      }, 500);
+    }
   });
+  /* RECEIVED WHEN PLAYERS MOVES, CHANGE POSITION OF RIGHT DIV */
+  socket.on('on-move', function (data) {
+    var model = '';
+    if (data.stat === 'attacker') {
+      model = $('#attacker').attr('src');
+      $('#attacker').remove();
+      $('#place' + data.x + '-' + data.y).append('<img tabindex="-1" id="attacker" src="'
+        + model + '" style="position:relative; bottom: 65px"></img>');
+      $('#attacker').focus();
+    }
+    if (data.stat === 'defender') {
+      model = $('#defender').attr('src');
+      $('#defender').remove();
+      $('#place' + data.x + '-' + data.y).append('<img tabindex="-1" id="defender" src="'
+        + model + '" style="position:relative; bottom: 65px"></img>');
+      $('#defender').focus();
+    }
+  });
+  /* INFORMATION ABOUT OPPONENT IS NOT AVAILABLE FOR BATTLE (OTHER BATTLE, OR EVENT) */
   socket.on('opponent-in-battle', function (data) {
     myPopup(data, 0, 200, 300);
   });
+  /* RECEIVED WHEN SERVER EVENT INCOMING, LOAD MAP WITH MONSTERS */
   socket.on('server-event', function (data) {
     generateEventMap(data, socket);
   });
+  /* RECEIVED WHEN EVENT END, (RETURNS RESULT, POSITIVE OR NEGATIVE) */
   socket.on('event-statistics', function (data) {
     $('#gaming').unbind('keydown');
     $('#gaming').empty();
@@ -76,17 +113,16 @@ $(document).ready(function () {
     runBattleScripts(socket);
   });
 
-  // SHOW PLAYERS LIST
+  /* SHOW PLAYERS LIST */
   socket.on('players-list', function (data) {
     showPlayers(data, socket);
   });
 
-  // SHOW RECEIVED MESSAGES
+  /* SHOW RECEIVED MESSAGES */
   socket.on('msg', function (data) {
     shoutboxCatchMsg(data);
   });
 
-  // TURN ON SHOUTBOX INTERFACE
+  /* TURN ON SHOUTBOX INTERFACE */
   shoutboxInterface(socket);
-
 });

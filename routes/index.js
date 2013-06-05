@@ -6,27 +6,27 @@ var mongoose = require('mongoose'),
   cookie  =   require('cookie'),
   connect =   require('connect');
 
-var stalkerToSocket = {},
+var stalkerToSocket = {}, 
   socketToStalker = {},
-  usersAllowed = {},
-  stalkerLocation = {},
-  stalkerFactions = {},
+  usersAllowed = {}, // [Cookie name : sid] : login
+  stalkerLocation = {}, // ID : LOCATION
+  stalkerFactions = {}, // ID : FACTION
   actualEvent = {
-    players : {},
+    players : {}, // LOGIN : ID
     time : 0,
     reward : 0,
     rewardText : '',
     penalty : 0,
     penaltyText : ''
   },
-  actualBattles = {};
+  actualBattles = {}; // name, faction, str, acc, end, att, head, life, x, y, opponent, stat
 
-
+  
 //------------------------------//
 //       HELPER FUNCTIONS       //
 //------------------------------// 
 
-// PREPARE PLAYERS LIST TO ROOM 
+/* PREPARE PLAYERS LIST TO ROOM  */
 var playersList = function (room) {
   var stalkersList = {},
     x;
@@ -38,7 +38,7 @@ var playersList = function (room) {
   return stalkersList;
 };
 
-// STYLING DATE FOR MY FORMAT 
+/* STYLING DATE FOR MY FORMAT */
 var parseDate = function (timeDate) {
   var date = timeDate.getDate(),
     month = parseInt(timeDate.getMonth(), 10) + 1,
@@ -61,7 +61,7 @@ var parseDate = function (timeDate) {
 exports.listen = function (server) {
   var io = socketio.listen(server);
   io.set('log level', 1);
-
+  /* MAKE EVENT, GET RANDOM EVENTS(NOW ONE), GET RANDOM PLAYERS, AND SEND MONSTERS TO THEM */
   var makeEvent = function () {
     var availableEvents = ['radiation'],
       eventToMake = availableEvents[Math.floor(Math.random() * 10) % availableEvents.length],
@@ -86,15 +86,11 @@ exports.listen = function (server) {
           for (x in actualEvent.players) {
             Stalker.findOne({ 'nick' : x}, function (err, stalker) {
               if (stalker.money >= 100) {
-                Stalker.findOne({ 'nick' : x}, function (err, stalker) {
-                }).update(
-                  { $inc: { money: -100  } }
-                );
+                Stalker.update({'nick' : x},
+                    { $inc: { money: -100 }}, function () {});
               } else {
-                Stalker.findOne({ 'nick' : x}, function (err, stalker) {
-                }).update(
-                  { $set: { money: 0  } }
-                );
+                Stalker.update({'nick' : x},
+                    { $inc: { money: 0 }}, function () {});
               }
             });
             io.sockets.socket(actualEvent.players[x]).emit('event-statistics', {
@@ -104,7 +100,7 @@ exports.listen = function (server) {
           }
           actualEvent.players = {};
         }, eventTime);
-      },
+      }, /* GET EVENT DATA FROM DB, AND PUT IT TO ACTUAL EVENT OBJECT, AFTER END, RUN CHOOSE PLAYERS*/
       chooseEvent = function (event_data) {
         if (event_data) {
           var eventData = event_data;
@@ -128,11 +124,11 @@ exports.listen = function (server) {
       };
     chooseEvent();
   };
-  // EVENTS START
+  /* EVENT LOOP */
   setInterval(function () {
     makeEvent();
-  }, 30000);
-  // END OF MAKE EVENTS
+  }, 120000);
+
   /*  Authorization with SID from client cookie, SID is added to list of 
       authorized clients after succesfully login to database.             */
   io.set('authorization', function (handshakeData, accept) {
@@ -145,15 +141,16 @@ exports.listen = function (server) {
     } else {
       return accept('No cookie transmitted.', false);
     }
-    if (usersAllowed[handshakeData.cookie]) {
+    if (usersAllowed[handshakeData.cookie]) { // IF USER SID IS IN USERSALLOWED, USER WAS LOGGED(AUTHORIZED)
       accept(null, true);
     } else {
       accept('You need login first', false);
     }
   });
-  // BEGIN OF NORMAL SOCKET EVENTS
+  
+  /* BEGIN OF NORMAL SOCKET EVENTS */
   io.sockets.on('connection', function (socket) {
-    // FUNCTION FOR TRAVELING ON MAP(CHANGING ROOM)
+    /* FUNCTION FOR TRAVELING ON MAP(CHANGING ROOM) */
     var placeMe = function (place) {
       if (!stalkerLocation[socket.id]) {
         stalkerLocation[socket.id] = place;
@@ -167,13 +164,13 @@ exports.listen = function (server) {
       socket.broadcast.to(stalkerLocation[socket.id]).
         emit('players-list', playersList(stalkerLocation[socket.id]));
       socket.emit('players-list', playersList(stalkerLocation[socket.id]));
-    },
+    }, /* BATTLE SUMMARY, NEED TO RUN THIS WHEN FIGHT CAN END, (0 HP OR DISCONNECT) */
       fightStatus = function (winner_socket, walkover_status) {
-        if (!walkover_status) {
+        if (!walkover_status) { // NORMAL FIGHT END
           var loser_socket = actualBattles[winner_socket].opponent;
           delete actualBattles[winner_socket];
           delete actualBattles[loser_socket];
-          Stalker.update({'nick' : socketToStalker[winner_socket]},
+          Stalker.update({'nick' : socketToStalker[winner_socket]}, // + MONEY, AND IF LEVEL IS EVEN, SKILL POINTS
             { $inc: { money: 200, level: 1}}, function () {
               Stalker.findOne({'nick': socketToStalker[winner_socket]}, function (err, stalker) {
                 if (stalker.level % 2 === 0) {
@@ -184,7 +181,7 @@ exports.listen = function (server) {
               io.sockets.socket(winner_socket).
                 emit('fight-result', {'msg' : 'Wygrałeś, oto Twoje pieniądze', 'stat' : 1});
             });
-          Stalker.findOne({ 'nick' : socketToStalker[loser_socket]}, function (err, stalker) {
+          Stalker.findOne({ 'nick' : socketToStalker[loser_socket]}, function (err, stalker) { // - MONEY
             var loser_data = {'msg' : 'Niestety, Twój przeciwnik okazał się silniejszy, ' +
                  'tak czy siak muszę wziąść swoją dolę na potrzeby zakładu.', 'stat' : 0};
             if (stalker.money >= 200) {
@@ -201,7 +198,7 @@ exports.listen = function (server) {
                 });
             }
           });
-        } else {
+        } else { // WALKOVER FIGHT END
           var win_with_walkover_socket = actualBattles[winner_socket].opponent,
             disconnected_nick = socketToStalker[winner_socket];
           delete actualBattles[winner_socket];
@@ -238,10 +235,8 @@ exports.listen = function (server) {
           { $set: { last_login: Date.now() } }
         );
       }
-      // setTimeout( function () {
-        // makeEvent();
-      // }, 5000);
     });
+    /* RECEIVED WHEN USER FIND BUNKER IN EVENT */
     socket.on('rescue', function (data) {
       Stalker.findOne({ 'nick' : socketToStalker[socket.id]}, function (err, stalker) {
       }).update(
@@ -255,7 +250,7 @@ exports.listen = function (server) {
     //  FIGHTING  //
     //------------//
     socket.on('attack', function (data) {
-      // FUNCTION FOR SEND ARENA DATA TO FIGHTERS
+      /* FUNCTION FOR SEND ARENA DATA TO FIGHTERS */
       var mapLoad = function (socket_att, socket_def, arena_options) {
         arena_options.role = 'attacker';
         io.sockets.socket(socket_att).emit('map-load', arena_options);
@@ -263,6 +258,7 @@ exports.listen = function (server) {
         io.sockets.socket(socket_def).emit('map-load', arena_options);
       };
       if (stalkerToSocket[data] !== socket.id) {
+        /* IF I AND OPPONENT ARE NOT IN EVENT AND NOT IN BATTLE */
         if (!actualBattles[stalkerToSocket[data]] && !actualBattles[socketToStalker[socket.id]] &&
             !actualEvent.players[data] && !actualEvent.players[socketToStalker[socket.id]]) {
           var attacker = {},
@@ -321,7 +317,6 @@ exports.listen = function (server) {
         }
       }
     });
-    var tester = 0;
     socket.on('move', function (data) {
       if (actualBattles[socket.id]) {
         var x = actualBattles[socket.id].x,
@@ -355,42 +350,34 @@ exports.listen = function (server) {
             }
           }
         }
-        var playerCords = {
+        var playerCords = { // WHO WAS MOVE, AND CORDS
             'stat' : actualBattles[socket.id].stat,
             'x' : actualBattles[socket.id].x,
             'y' : actualBattles[socket.id].y
           };
         socket.emit('on-move', playerCords);
         io.sockets.socket(actualBattles[socket.id].opponent).emit('on-move', playerCords);
-        // if (actualBattles[socket.id]) {
-          // fightStatus(socket.id);
-        // };
       }
     });
+    /* LOGIC OF POTIONS */
     socket.on('potion', function (data) {
       if (data === 'str') {
         actualBattles[socket.id].str += 10;
         actualBattles[socket.id].att += 15;
-        Stalker.findOne({ 'nick' : socketToStalker[socket.id]}, function (err, stalkers) {})
-          .update(
-            { $inc: { energetic : -1 } }
-          );
+        Stalker.update({'nick' : socketToStalker[socket.id]},
+          { $inc: { energetic: -1 }}, function () {});
       } else if (data === 'acc') {
         actualBattles[socket.id].acc += 10;
         actualBattles[socket.id].head += 10;
-        Stalker.findOne({ 'nick' : socketToStalker[socket.id]}, function (err, stalkers) {})
-          .update(
-            { $inc: { vodka : -1 } }
-          );
+        Stalker.update({'nick' : socketToStalker[socket.id]},
+          { $inc: { vodka: -1 }}, function () {});
       } else {
         actualBattles[socket.id].life += 50;
         if (actualBattles[socket.id].life >= actualBattles[socket.id].end * 20) {
           actualBattles[socket.id].life = actualBattles[socket.id].end * 20;
         }
-        Stalker.findOne({ 'nick' : socketToStalker[socket.id]}, function (err, stalkers) {})
-          .update(
-            { $inc: { firstaid : -1 } }
-          );
+        Stalker.update({'nick' : socketToStalker[socket.id]},
+          { $inc: { first: -1 }}, function () {});
         socket.emit('potion-result', {'who' : actualBattles[socket.id].stat,
                                       'life' : actualBattles[socket.id].life});
         io.sockets.socket(actualBattles[socket.id].opponent).emit('potion-result', {
@@ -399,7 +386,7 @@ exports.listen = function (server) {
         });
       }
     });
-    // NEED TO ADD TAKING DAMAGE AND SEND STATS OF SHOOT
+    /* SHOOTING, IF HIT SEND SPECIFIC DATA WITH CALCULATED DMG AND UPDATED LIFE, IF MISS SEND EVENT WITH INFO */
     socket.on('shooting', function (data) {
       var calculateDmg = function (dmg, crit) {
         var dmg_dispersion = 1 - (Math.floor((Math.random() * 100) % 41 - 20) / 100).toPrecision(2),
@@ -429,18 +416,18 @@ exports.listen = function (server) {
         if (actualBattles[opponent_socket].life <= 0) {
           fightStatus(socket.id);
         }
+      } else {
+        socket.emit('shooting-result', {miss: true, x: data.x, y: data.y});
+        io.sockets.socket(opponent_socket).emit('shooting-result', {miss: true, x: data.x, y: data.y});
       }
     });
-    //---------------//
-    //   TRAVELING   //
-    //---------------//
+    /* TRAVELING */
     socket.on('travel', function (data) {
-      Stalker.findOne({ 'nick' : socketToStalker[socket.id]}, function (err, stalkers) {})
-        .update(
-          { $set: { place: data.where } }
-        );
+      Stalker.update({'nick' : socketToStalker[socket.id]},
+          { $set: { place: data.where }}, function () {});
       placeMe(data.where);
     });
+    /* LEVEL UP, INCREASE STATISTICS */
     socket.on('level-up', function (data) {
       Stalker.findOne({'nick' : socketToStalker[socket.id]}, function (err, stalkers) {
         if (stalkers.points > 0) {
@@ -461,6 +448,7 @@ exports.listen = function (server) {
         }
       });
     });
+    /* SHOOPING - INCREASE ITEMS STAT */
     socket.on('shooping', function (data) {
       var upd;
       Stalker.findOne({ 'nick' : socketToStalker[socket.id]}, function (err, stalkers) {
@@ -473,10 +461,8 @@ exports.listen = function (server) {
             } else {
               upd = { money: -500, armor: 1, end: 1, life: 20};
             }
-            Stalker.findOne({ 'nick' : socketToStalker[socket.id]}, function (err, stalkers) {})
-              .update(
-                { $inc: upd }
-              );
+            Stalker.update({'nick' : socketToStalker[socket.id]},
+              { $inc: upd }, function () {});
             socket.emit('shopping-result', 1);
           } else {
             socket.emit('shopping-result', 0);
@@ -490,10 +476,8 @@ exports.listen = function (server) {
             } else {
               upd = { money: -50, firstaid: 1 };
             }
-            Stalker.findOne({ 'nick' : socketToStalker[socket.id]}, function (err, stalkers) {})
-              .update(
-                { $inc:  upd  }
-              );
+            Stalker.update({'nick' : socketToStalker[socket.id]},
+              { $inc: upd }, function () {});
             socket.emit('shopping-result', 1);
           } else {
             socket.emit('shopping-result', 0);
@@ -504,7 +488,7 @@ exports.listen = function (server) {
     socket.on('msg', function (data) {
       io.sockets.to(stalkerLocation[socket.id]).emit('msg', socketToStalker[socket.id] + ': ' + data);
     });
-    socket.on('disconnect', function () {
+    socket.on('disconnect', function () { // IF WAS IN FIGHT, OPPONENT WIN WITH WALKOVER
       if (actualBattles[socket.id]) {
         fightStatus(socket.id, 'walkover');
       }
@@ -518,9 +502,7 @@ exports.listen = function (server) {
   });
 };
 
-//-----------------------------------//
-//       SENDING SESSION DATA        //
-//-----------------------------------//
+/* RETURNS ACCOUNT LOGIN */
 exports.socketConnect = function (req, res) {
   res.writeHead(200, {
     'Content-Type': 'application/json; charset=utf8'
@@ -528,7 +510,7 @@ exports.socketConnect = function (req, res) {
   res.end(JSON.stringify(req.session.account));
 };
 
-// MAIN PAGE
+/* MAIN PAGE */
 exports.index = function (req, res) {
   var pageHtml = '',
     statistics = '';
@@ -551,7 +533,7 @@ exports.index = function (req, res) {
   });
 };
 
-// LOGIN FORM
+/* LOGIN FORM */
 exports.login = function (req, res) {
   Stalker.findOne({ 'nick' : req.body.login}, function (err, stalker) {
     var pageHtml = '',
@@ -564,7 +546,7 @@ exports.login = function (req, res) {
         '</form></div>';
     if (stalker) {
       if (stalker.isValidPassword(req.body.password)) {
-          // INITIALIZE EXPRESS SESSION
+        // ADD USER INTO ALLOWED SOCKETS
         req.session.account = stalker.nick;
         usersAllowed[req.cookies] = stalker.nick;
         res.redirect('/');
@@ -583,7 +565,7 @@ exports.login = function (req, res) {
   });
 };
 
-// LOGOUT
+/* LOGOUT */
 exports.logout = function (req, res) {
   if (req.session.account) {
     var x;
@@ -598,7 +580,7 @@ exports.logout = function (req, res) {
   res.redirect('/');
 };
 
-// CREATE STALKER FORM
+/* CREATE STALKER FORM */
 exports.createChar = function (req, res) {
   var img = '',
     i,
@@ -648,7 +630,7 @@ exports.createChar = function (req, res) {
   }
 };
 
-// GET CHARACTER SCHEMA FOR CHOOSE FACTION
+/* GET CHARACTER SCHEMA FOR CHOOSE FACTION */
 exports.getCharacterSchema = function (req, res) {
   StalkerSchema.findOne({ 'name' : req.query.faction }, function (err, stalkerschemas) {
     var schema = { 'image' : stalkerschemas.image,
@@ -662,7 +644,7 @@ exports.getCharacterSchema = function (req, res) {
   });
 };
 
-// CREATE STALKER - MONGO FUNCTION
+/* CREATE STALKER */
 exports.createStalker = function (req, res) {
   new Stalker({
     nick          : req.body.nickname,
@@ -696,9 +678,7 @@ exports.createStalker = function (req, res) {
       }
     });
 };
-//-------------------------------------------//
-//  GENERATE AND SEND STATISTICS FOR PLAYER  //
-//-------------------------------------------//
+/* GENERATE AND SEND STATISTICS FOR PLAYER */
 exports.statistics = function (req, res) {
   if (req.session.account) {
     Stalker.findOne({'nick' : req.session.account}, function (err, stalkers) {
