@@ -275,6 +275,7 @@ exports.listen = function (server) {
               stalker.life = stalker.end * 20;
               stalker.x = 0;
               stalker.y = 0;
+              stalker.skill = '';
               if (option === 0) {
                 attacker = stalker;
                 attacker.y = Math.floor(Math.random() * 10) % 5;
@@ -386,39 +387,104 @@ exports.listen = function (server) {
         });
       }
     });
+    socket.on('skill', function (data) {
+      actualBattles[socket.id].skill = data;
+    });
+    
     /* SHOOTING, IF HIT SEND SPECIFIC DATA WITH CALCULATED DMG AND UPDATED LIFE, IF MISS SEND EVENT WITH INFO */
     socket.on('shooting', function (data) {
-      var calculateDmg = function (dmg, crit) {
-        var dmg_dispersion = 1 - (Math.floor((Math.random() * 100) % 41 - 20) / 100).toPrecision(2),
-          crit_chance = Math.floor(Math.random() * 1000) % 101;
-        dmg = dmg * dmg_dispersion;
-        if (crit_chance < crit) {
-          dmg = dmg * 2;
-        }
-        return dmg.toPrecision(3);
-      },
-        opponent_socket = actualBattles[socket.id].opponent,
-        shoot_dmg = calculateDmg(actualBattles[socket.id].att, actualBattles[socket.id].head);
-      if (actualBattles[opponent_socket].x === data.x && actualBattles[opponent_socket].y === data.y) {
-        actualBattles[opponent_socket].life = Math.floor(actualBattles[opponent_socket].life - shoot_dmg);
-        var shooting_stats = {};
-        if (actualBattles[socket.id].stat === 'attacker') {
-          shooting_stats.attacker = actualBattles[socket.id].life;
-          shooting_stats.defender = actualBattles[opponent_socket].life;
-          shooting_stats.who = 'defender';
+      if (actualBattles[socket.id]) {
+        var opponent_socket = actualBattles[socket.id].opponent,
+        calculateDmg = function (dmg, crit) {
+          var dmg_dispersion = 1 - (Math.floor((Math.random() * 100) % 41 - 20) / 100).toPrecision(2),
+            crit_chance = Math.floor(Math.random() * 1000) % 101;
+          dmg = dmg * dmg_dispersion;
+          if (crit_chance < crit) {
+            dmg = dmg * 2;
+          }
+          return dmg.toPrecision(3);
+        },
+        skillBarrage = function (x,y) {
+          var i,
+              j,
+              shooting_stats = {},
+              hit = [];
+          for (i = y - 1; i < y + 2; i += 1) {
+            for (j = x - 1; j < x + 2; j += 1) {
+              if (actualBattles[opponent_socket].x === j && actualBattles[opponent_socket].y === i) {
+                hit.push(j);
+                hit.push(i);
+              }
+            }
+          }
+          if (hit.length > 0) {
+            if (actualBattles[socket.id].stat === 'attacker') {
+              shooting_stats.attacker = actualBattles[socket.id].life;
+              shooting_stats.defender = actualBattles[opponent_socket].life;
+              shooting_stats.x = x;
+              shooting_stats.y = y;
+              shooting_stats.skill = true;
+            } else {
+              shooting_stats.defender = actualBattles[socket.id].life;
+              shooting_stats.attacker = actualBattles[opponent_socket].life;
+              shooting_stats.x = x;
+              shooting_stats.y = y;
+              shooting_stats.skill = true;
+            }
+          } else {
+            shooting_stats.x = x;
+            shooting_stats.y = y;
+            shooting_stats.miss = true;
+            shooting_stats.skill = true;
+          }
+          return shooting_stats;
+        };          
+        var shoot_dmg = calculateDmg(actualBattles[socket.id].att, actualBattles[socket.id].head);
+        if (actualBattles[socket.id].skill !== '') {
+          if (actualBattles[socket.id].skill === 'barrage') {
+            var after_barrage = skillBarrage(data.x, data.y);
+            actualBattles[socket.id].skill = '';
+            
+            if (after_barrage.miss) {
+              socket.emit('shooting-result', after_barrage);
+              io.sockets.socket(opponent_socket).emit('shooting-result', after_barrage);
+            } else {
+              actualBattles[opponent_socket].life = Math.floor(actualBattles[opponent_socket].life - shoot_dmg);
+              if (actualBattles[socket.id].stat === 'attacker') {
+                after_barrage.defender = actualBattles[actualBattles[socket.id].opponent].life;
+              } else {
+                after_barrage.attacker = actualBattles[actualBattles[socket.id].opponent].life;
+              }
+              socket.emit('shooting-result', after_barrage);
+              io.sockets.socket(opponent_socket).emit('shooting-result', after_barrage);
+              if (actualBattles[opponent_socket].life <= 0) {
+                fightStatus(socket.id);
+              }
+            }
+          }
         } else {
-          shooting_stats.defender = actualBattles[socket.id].life;
-          shooting_stats.attacker = actualBattles[opponent_socket].life;
-          shooting_stats.who = 'attacker';
+          if (actualBattles[opponent_socket].x === data.x && actualBattles[opponent_socket].y === data.y) {
+            actualBattles[opponent_socket].life = Math.floor(actualBattles[opponent_socket].life - shoot_dmg);
+            var shooting_stats = {};
+            if (actualBattles[socket.id].stat === 'attacker') {
+              shooting_stats.attacker = actualBattles[socket.id].life;
+              shooting_stats.defender = actualBattles[opponent_socket].life;
+              shooting_stats.who = 'defender';
+            } else {
+              shooting_stats.defender = actualBattles[socket.id].life;
+              shooting_stats.attacker = actualBattles[opponent_socket].life;
+              shooting_stats.who = 'attacker';
+            }
+            socket.emit('shooting-result', shooting_stats);
+            io.sockets.socket(opponent_socket).emit('shooting-result', shooting_stats);
+            if (actualBattles[opponent_socket].life <= 0) {
+              fightStatus(socket.id);
+            }
+          } else {
+            socket.emit('shooting-result', {miss: true, x: data.x, y: data.y});
+            io.sockets.socket(opponent_socket).emit('shooting-result', {miss: true, x: data.x, y: data.y});
+          }
         }
-        socket.emit('shooting-result', shooting_stats);
-        io.sockets.socket(opponent_socket).emit('shooting-result', shooting_stats);
-        if (actualBattles[opponent_socket].life <= 0) {
-          fightStatus(socket.id);
-        }
-      } else {
-        socket.emit('shooting-result', {miss: true, x: data.x, y: data.y});
-        io.sockets.socket(opponent_socket).emit('shooting-result', {miss: true, x: data.x, y: data.y});
       }
     });
     /* TRAVELING */

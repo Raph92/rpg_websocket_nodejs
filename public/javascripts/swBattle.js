@@ -33,18 +33,18 @@ var generateMap = function (data, socket) {
         $('#gaming').keydown(function (e) {
           playerWalking(e);
         });
-      }, 400);
+      }, 800);
       switch (e.which) {
-      case 37: // LEFT
+      case 65: // LEFT
         socket.emit('move', 'left');
         break;
-      case 38: // UP
+      case 87: // UP
         socket.emit('move', 'up');
         break;
-      case 39: // RIGHT
+      case 68: // RIGHT
         socket.emit('move', 'right');
         break;
-      case 40: // DOWN
+      case 83: // DOWN
         socket.emit('move', 'down');
         break;
       default:
@@ -53,9 +53,7 @@ var generateMap = function (data, socket) {
       e.preventDefault();
     },
     playerShooting = function (place) { // SHOOTING FUNCTION, SENDS COORDS OF SHOOT
-      var gunSound = new Audio("../sounds/ak.wav"),
         cords = idUnparse(place);
-      gunSound.play();
       // UNBIND EVENT
       $('.battleDivs').unbind('click');
       $('#gaming').css('cursor', 'crosshair');
@@ -81,7 +79,7 @@ var generateMap = function (data, socket) {
   for (i = 0; i < 5; i += 1) {
     for (j = 0; j < 12; j += 1) {
       htmlGaming += '<div id="place' + j + '-' + i +
-        '" class="battleDivs" style="width: 43px; height: 43px;' +
+        '" class="battleDivs" style="border: 1px solid black; width: 43px; height: 43px;' +
         'position: absolute; top: ' + (i * 43) + 'px; left: ' + (j * 43) + 'px;">';
       if (i === data.att_y && j === data.att_x) {
         htmlGaming += '<img tabindex="-1" id="attacker" src="../images/' + data.att_faction +
@@ -106,16 +104,20 @@ var generateMap = function (data, socket) {
   $('#d-hp').text(data.def_life + 'HP').css('margin-right', '5px');
   $('#a-nick').text(data.att_nick).css('margin-left', '5px');
   $('#d-nick').text(data.def_nick).css('margin-right', '5px');
-  /* INSERT ITEMS TO USE BAR */
-  $('#gaming').append('<img name="str" title="+10 Siła"id="str-pot" ' +
+  /* INSERT ITEMS AND SKILLS TO USE BAR */
+  $('#gaming').append(
+    '<img name="str" title="+10 Siła"id="str-pot" ' +
     'src="../images/str_potion_skill.png" style="position: absolute;' +
-    'bottom: 0px; left: 35%"></img>' +
+    'bottom: 0px; left: 30%"></img>' +
     '<img name="acc" title="+10 Celność"id="acc-pot" ' +
     'src="../images/acc_potion_skill.png" style="position: absolute;' +
-    'bottom: 0px; left: 45%"></img>' +
+    'bottom: 0px; left: 40%"></img>' +
     '<img name="hp" title="+50 Życia"id="hp-pot" ' +
     'src="../images/hp_potion_skill.png" style="position: absolute;' +
-    'bottom: 0px; left: 55%"></img>');
+    'bottom: 0px; left: 50%"></img>' +
+    '<img class="skills" name="barrage" title="Wystrzel serię pocisków" id="barrage-shot" ' +
+    'src="../images/barrage_skill.png" style="position: absolute; bottom: 0px; left: 60%"></img>'
+  );
   $('#gaming img').tooltip({
     track: true
   });
@@ -150,6 +152,27 @@ var generateMap = function (data, socket) {
   } else {
     $('#acc-pot').css('opacity', '0.5');
   }
+  // Skill action
+  var skills = function (power) {
+    var itemSound = new Audio("../sounds/potion.wav");
+    itemSound.play();
+    power.unbind('click');
+    var skillsTimeout = setTimeout(function () {
+      power.click(function () {
+        skills(power);
+      });
+      power.css('opacity', '1');
+    }, 3000);
+    
+    power.css('opacity', '0.5');
+    socket.emit('skill', power.attr('name'));
+  };
+  
+  
+  $('.skills').click(function () {
+    skills($(this));
+  });
+
   if (role === 'attacker') {
     $('#attacker').focus();
   } else {

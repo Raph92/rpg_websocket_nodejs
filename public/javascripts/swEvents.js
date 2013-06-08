@@ -120,7 +120,7 @@ var generateEventMap = function (data, socket) {
       // });
     // }, 250);
     switch (e.which) {
-    case 37: // LEFT
+    case 65: // LEFT
       if (idUnparse($('.player')).x > 0) {
         var pos = idUnparse($('.player')),
           x = pos.x,
@@ -134,7 +134,7 @@ var generateEventMap = function (data, socket) {
         }
       }
       break;
-    case 38: // UP
+    case 87: // UP
       if (idUnparse($('.player')).y > 0) {
         var pos = idUnparse($('.player')),
           x = pos.x,
@@ -147,7 +147,7 @@ var generateEventMap = function (data, socket) {
         }
       }
       break;
-    case 39: // RIGHT
+    case 68: // RIGHT
       if (idUnparse($('.player')).x < 11) {
         var pos = idUnparse($('.player')),
           x = pos.x,
@@ -161,7 +161,7 @@ var generateEventMap = function (data, socket) {
         }
       }
       break;
-    case 40: // DOWN
+    case 83: // DOWN
       if (idUnparse($('.player')).y < 5) {
         var pos = idUnparse($('.player')),
           x = pos.x,

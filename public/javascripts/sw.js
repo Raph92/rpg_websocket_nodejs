@@ -2,7 +2,7 @@ $(document).ready(function () {
   'use strict';
   /* RUN SCRIPTS TO IMPROVE REGISTRATION FORM */
   createCharScripts();
-  var socket = io.connect('http://localhost:3000');
+  var socket = io.connect(window.location.hostname);
   socket.on('error', function (reason) {
     console.error('Unable to connect Socket.IO', reason);
   });
@@ -59,20 +59,59 @@ $(document).ready(function () {
     runBattleScripts(socket);
   });
   /* CLIENT TRY TO SHOOT OPPONENT, IF HIT, RECEIVE THIS EVENT */
-  socket.on('shooting-result', function (data) {
-    if (!data.miss) {
-      $('.hp-count:eq(0)').text(data.attacker + 'HP');
-      $('.hp-count:eq(1)').text(data.defender + 'HP');
-      $('#' + data.who).parent().append('<img style="position:relative; bottom: 140px;"' +                                  'id="last-bloody" src="../images/blood.png"></img>');
-      setTimeout(function () {
-        $('#last-bloody').remove();
-      }, 500);
+  socket.on('shooting-result', function (data) { 
+    if(data.skill) {
+      var barrageSound = new Audio("../sounds/barrage.wav"),
+        i,
+        j;
+      var animateBarrage = function (x, y) {
+        var temp = [];
+        for (i = y - 1; i < y + 2; i += 1) {
+          for (j = x - 1; j < x + 2; j += 1) {
+            $('#place' + j + '-' + i).css('background-image', 'url(../images/bullet_whole.png)');
+          }
+        }
+        setTimeout(function () {
+        for (i = y - 1; i < y + 2; i += 1) {
+          for (j = x - 1; j < x + 2; j += 1) {
+            $('#place' + j + '-' + i).css('background-image', 'none');
+          }
+        }  
+        }, 1000);
+      };  
+      if (!data.miss) {
+        console.log(data);
+        $('.hp-count:eq(0)').text(data.attacker + 'HP');
+        $('.hp-count:eq(1)').text(data.defender + 'HP');
+        animateBarrage(data.x, data.y);
+        barrageSound.play();
+      } else {
+        animateBarrage(data.x, data.y);
+        barrageSound.play();
+      }
     } else {
-      $('#place' + data.x + '-' + data.y).css('background-image', 'url(../images/bullet_whole.png)');
-      setTimeout(function () {
-        $('#place' + data.x + '-' + data.y).css('background-image', 'none');
-      }, 500);
+      var gunSound = new Audio("../sounds/ak.wav");
+      if (!data.miss) {
+        gunSound.play();
+        $('.hp-count:eq(0)').text(data.attacker + 'HP');
+        $('.hp-count:eq(1)').text(data.defender + 'HP');
+        $('#' + data.who).parent().append('<img style="position:relative; bottom: 140px;"' +                                  'id="last-bloody" src="../images/blood.png"></img>');
+        setTimeout(function () {
+          $('#last-bloody').remove();
+        }, 500);
+      } else {
+        gunSound.play();
+        $('#place' + data.x + '-' + data.y).css('background-image', 'url(../images/bullet_whole.png)');
+        setTimeout(function () {
+          $('#place' + data.x + '-' + data.y).css('background-image', 'none');
+        }, 500);
+      }
     }
+    
+    
+    
+    
+    
   });
   /* RECEIVED WHEN PLAYERS MOVES, CHANGE POSITION OF RIGHT DIV */
   socket.on('on-move', function (data) {
