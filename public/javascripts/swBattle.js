@@ -162,7 +162,7 @@ var generateMap = function (data, socket) {
         skills(power);
       });
       power.css('opacity', '1');
-    }, 3000);
+    }, 10000);
     
     power.css('opacity', '0.5');
     socket.emit('skill', power.attr('name'));
